@@ -1,0 +1,86 @@
+
+/* ===============================
+   Branding Provefarma (fondo claro)
+   Archivo: styles.css
+   =============================== */
+
+:root {
+  /* Paleta corporativa (foco en claridad) */
+  --bg: #ffffff;        /* Fondo completamente blanco */
+  --primary: #1f57a8;   /* Azul Provefarma (botón, títulos) */
+  --primary-700: #15417d; /* Azul más oscuro para hover */
+  --accent: #f4bb00;    /* Amarillo del isotipo (enfasis/foco) */
+  --text: #233044;      /* Gris azulado legible */
+  --muted: #6b7280;     /* Texto secundario */
+  --card: #ffffff;      /* Fondo de tarjeta (blanco) */
+  --border: #e5e7eb;    /* Líneas/bordes sutiles */
+  --radius: 12px;       /* Radio de borde estándar */
+}
+
+/* Reset mínimo y base */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 760px;
+  margin: 40px auto;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);   /* Contorno sutil para separar del fondo blanco */
+  border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04); /* Sombra muy suave */
+}
+
+/* Banda superior con degradado corporativo (fina y elegante) */
+.brand-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 16px;
+}
+
+/* Cabecera con logo Provefarma únicamente */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+/* Asegura tamaño consistente del logo */
+.logo {
+  height: 48px;
+  object-fit: contain;
+}
+
+/* Títulos y textos */
+h1 {
+  color: var(--primary);
+  margin: 6px 0 8px;
+  font-size: 1.6rem;
+}
+p { color: var(--muted); margin: 0 0 18px; }
+
+/* Campos de formulario */
+.field { margin-bottom: 16px; }
+label { font-weight: 600; display: block; margin-bottom: 6px; }
+select, textarea, input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 15px;
+  color: var(--text);
+}
+select:focus, textarea:focus, input[type="text"]:focus {
