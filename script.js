@@ -142,9 +142,8 @@ if (form) {
     try {
       const res = await fetch(GAS_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json' // evitamos headers extra para no complicar CORS
-        },
+        // Usamos text/plain para evitar preflight CORS con Apps Script
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
         body: JSON.stringify(payload)
       });
 
@@ -167,4 +166,6 @@ if (form) {
     }
   });
 }
+``
+
 
