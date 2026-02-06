@@ -1,35 +1,41 @@
 :root {
+  /* Variables originales de tu marca */
   --bg: #f9fafb;
-  --primary: #1f57a8;
+  --primary: #1f57a8;       /* Azul Provefarma */
   --primary-hover: #15417d;
-  --accent: #f4bb00;
+  --accent: #f4bb00;        /* Amarillo corporativo */
+  --accent-light: #fff9c4;  /* Amarillo clarito para selecciones */
   --text: #233044;
   --muted: #6b7280;
   --border: #e5e7eb;
   --error: #cc1f1a;
   --success: #0b6e4f;
+  --white: #ffffff;
+  --border-radius: 8px;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg);
   color: var(--text);
   display: flex;
   justify-content: center;
   padding: 20px;
+  line-height: 1.6;
 }
 
 .container {
-  max-width: 600px;
+  max-width: 700px; /* Aumenté un poco el ancho para que quepan bien los botones del 0 al 10 */
   width: 100%;
-  background: #fff;
+  background: var(--white);
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
   border: 1px solid var(--border);
 }
 
+/* Banda y Cabecera */
 .brand-bar {
   height: 6px;
   background: linear-gradient(90deg, var(--accent), var(--primary));
@@ -37,39 +43,205 @@ body {
   border-radius: 12px 12px 0 0;
 }
 
-.logo { height: 50px; margin-bottom: 10px; }
-h1 { font-size: 1.5rem; color: var(--primary); margin: 10px 0; }
+.brand-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-.field { margin-bottom: 20px; }
-label { display: block; font-weight: 600; margin-bottom: 8px; }
+.logo { 
+  height: 50px; 
+  margin-bottom: 10px; 
+  max-width: 100%;
+}
 
-select, textarea, input {
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 20px;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin: 10px 0;
+}
+
+header p {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* Campos del formulario */
+.field {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #fff;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border);
+}
+
+label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+.sub-label {
+  font-weight: 600;
+  font-size: 0.95em;
+  margin-bottom: 8px;
+  display: block;
+  color: var(--text);
+}
+
+/* Inputs de texto básicos */
+select, textarea, input[type="text"] {
   width: 100%;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-input.is-invalid { border-color: var(--error); background-color: #fff5f5; }
+input.is-invalid {
+  border-color: var(--error);
+  background-color: #fff5f5;
+}
 
-.hint { color: var(--muted); font-size: 0.85rem; margin-top: 5px; display: block; }
+/* --- ESTILOS NUEVOS: BOTONES DE ESCALA (0-10 y 1-5) --- */
 
+/* Ocultar el radio button nativo */
+.scale-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Contenedor flexible */
+.scale-container {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap; 
+  justify-content: flex-start;
+}
+
+/* Estilo del botón numérico */
+.scale-btn {
+  flex: 1;
+  min-width: 35px;
+  text-align: center;
+  padding: 12px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--white);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.scale-btn:hover {
+  background-color: #f0f7ff;
+  border-color: var(--primary);
+}
+
+/* Estado Seleccionado (Radio checked) */
+.scale-input:checked + .scale-btn {
+  background-color: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.scale-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* --- ESTILOS NUEVOS: BOTONES GRANDES (Canal y Motivos) --- */
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  padding: 14px 15px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fdfdfd;
+  transition: background 0.2s, border-color 0.2s;
+  font-weight: 500;
+}
+
+.option-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+/* Estado Seleccionado: Amarillo clarito */
+.scale-input:checked + .option-btn {
+  background-color: var(--accent-light); /* Amarillo suave */
+  border-color: var(--accent);           /* Borde amarillo oscuro/dorado */
+  color: var(--text);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--accent); /* Borde doble sutil */
+}
+
+/* Sub-preguntas y utilidades */
+.sub-pregunta {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.sub-pregunta:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Clase para ocultar elementos (Lógica JS) */
+.hidden {
+  display: none !important;
+}
+
+/* Botón de envío y footer */
 .btn {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   background-color: var(--primary);
-  color: #white;
-  color: white;
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  transition: background-color 0.3s;
 }
 
 .btn:hover { background-color: var(--primary-hover); }
 .btn:disabled { background-color: var(--muted); cursor: not-allowed; }
 
 #status { margin-top: 15px; font-weight: 500; text-align: center; }
+
+footer {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 
