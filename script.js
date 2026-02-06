@@ -6,7 +6,7 @@ const form = document.getElementById('encuestaForm');
 const statusEl = document.getElementById('status');
 const rutInput = document.getElementById('rut');
 
-// --- Utilidades de RUT (Idéntico a tu versión anterior) ---
+// --- Utilidades de RUT ---
 function cleanRut(rut) { return (rut || '').replace(/[^0-9kK]/g, '').toUpperCase(); }
 
 function formatRut(rut) {
@@ -43,25 +43,29 @@ function getRadioValue(name) {
   return selected ? selected.value : '';
 }
 
-// --- LÓGICA DE VISIBILIDAD (NUEVO) ---
+// --- LÓGICA DE VISIBILIDAD (ACTUALIZADA) ---
 function updateVisibility() {
   // 1. Lógica de Canal (P2 -> P3)
   const canal = getRadioValue('canal');
   const bloqueAmabilidad = document.getElementById('sub_p3_amabilidad');
   const bloqueAsesoria = document.getElementById('sub_p3_asesoria');
   const bloqueWeb = document.getElementById('sub_p3_web');
+  const bloqueStock = document.getElementById('sub_p3_stock');
 
   if (canal === 'web') {
-    // Si es Web: Ocultar humano, mostrar web
-    bloqueAmabilidad.classList.add('hidden');
-    bloqueAsesoria.classList.add('hidden');
-    bloqueWeb.classList.remove('hidden');
+    // CASO WEB: Ocultar todo lo humano Y el stock. Mostrar solo Web.
+    if(bloqueAmabilidad) bloqueAmabilidad.classList.add('hidden');
+    if(bloqueAsesoria) bloqueAsesoria.classList.add('hidden');
+    if(bloqueStock) bloqueStock.classList.add('hidden'); // Ocultamos Stock también
+    if(bloqueWeb) bloqueWeb.classList.remove('hidden');
   } else if (canal === 'telefono' || canal === 'terreno') {
-    // Si es Humano: Mostrar humano, ocultar web
-    bloqueAmabilidad.classList.remove('hidden');
-    bloqueAsesoria.classList.remove('hidden');
-    bloqueWeb.classList.add('hidden');
+    // CASO HUMANO: Mostrar humano y stock. Ocultar web.
+    if(bloqueAmabilidad) bloqueAmabilidad.classList.remove('hidden');
+    if(bloqueAsesoria) bloqueAsesoria.classList.remove('hidden');
+    if(bloqueStock) bloqueStock.classList.remove('hidden'); // Mostramos Stock
+    if(bloqueWeb) bloqueWeb.classList.add('hidden');
   }
+  // Si no hay selección, mantenemos el estado default del HTML
 
   // 2. Lógica de Precios (P4 -> P5)
   const p4_1 = parseInt(getRadioValue('p4_1')) || 0;
@@ -71,23 +75,27 @@ function updateVisibility() {
   const esDetractorPrecio = (p4_1 > 0 && p4_1 <= 2) || (p4_2 > 0 && p4_2 <= 2);
   const bloqueMotivo = document.getElementById('bloque_motivo_precio');
 
-  if (esDetractorPrecio) {
-    bloqueMotivo.classList.remove('hidden');
-  } else {
-    bloqueMotivo.classList.add('hidden');
+  if (bloqueMotivo) {
+    if (esDetractorPrecio) {
+      bloqueMotivo.classList.remove('hidden');
+    } else {
+      bloqueMotivo.classList.add('hidden');
+    }
   }
 
   // 3. Lógica de "Otro" Motivo (P5 -> Input texto)
   const motivo = getRadioValue('motivo_precio');
   const inputOtro = document.getElementById('motivo_precio_otro');
   
-  if (motivo === 'Otro') {
-    inputOtro.classList.remove('hidden');
-    inputOtro.required = true; // Hacerlo obligatorio si selecciona "Otro"
-  } else {
-    inputOtro.classList.add('hidden');
-    inputOtro.required = false;
-    inputOtro.value = ''; // Limpiar si cambia de opción
+  if (inputOtro) {
+    if (motivo === 'Otro') {
+      inputOtro.classList.remove('hidden');
+      inputOtro.required = true;
+    } else {
+      inputOtro.classList.add('hidden');
+      inputOtro.required = false;
+      inputOtro.value = ''; 
+    }
   }
 }
 
@@ -121,7 +129,7 @@ if (form) {
       return;
     }
 
-    // Validación visual de campos requeridos (extra a HTML)
+    // Validación visual de campos requeridos (NPS)
     const nps = getRadioValue('nps');
     if (!nps) {
       statusEl.textContent = 'Por favor, responda la pregunta 1 (NPS).';
@@ -134,8 +142,7 @@ if (form) {
     const btn = form.querySelector('button');
     btn.disabled = true;
 
-    // Construcción del objeto de datos (Payload)
-    // Mapeamos todos los campos nuevos
+    // Construcción del Payload
     const payload = {
       nps: getRadioValue('nps'),
       nps_razon: document.getElementById('nps_razon').value,
@@ -181,7 +188,7 @@ if (form) {
       statusEl.style.color = '#0b6e4f';
       form.reset();
       
-      // Resetear visibilidad visualmente tras limpiar
+      // Restaurar visibilidad inicial
       updateVisibility(); 
       rutInput.classList.remove('is-invalid');
       
@@ -195,8 +202,9 @@ if (form) {
   });
 }
 
-// Ejecutar una vez al inicio para asegurar estado correcto (ej: campos ocultos)
+// Ejecutar al inicio para asegurar estado visual correcto
 updateVisibility();
+
 
 
 
