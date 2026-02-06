@@ -120,7 +120,7 @@
       background-color: #fff5f5;
     }
 
-    /* --- ESTILOS NUEVOS: BOTONES DE ESCALA (0-10 y 1-5) --- */
+    /* --- ESTILOS: BOTONES DE ESCALA (0-10 y 1-5) --- */
 
     /* Ocultar el radio button nativo */
     .scale-input {
@@ -171,11 +171,14 @@
       display: flex;
       justify-content: space-between;
       margin-top: 8px;
-      font-size: 0.85rem;
+      font-size: 0.75rem; /* Un poco más pequeño para las sub-preguntas */
       color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* --- ESTILOS NUEVOS: BOTONES GRANDES (Canal y Motivos) --- */
+    /* --- ESTILOS: BOTONES GRANDES (Canal y Motivos) --- */
 
     .options-list {
       display: flex;
@@ -272,7 +275,7 @@
 
       <!-- PREGUNTA 1: NPS (0-10) -->
       <div class="field">
-        <label>1. En base a su última experiencia, ¿qué tan probable es que recomiende Provefarma a un colega, amigo y/o profesional de su sector?</label>
+        <label>En base a su última experiencia, ¿qué tan probable es que recomiende Provefarma a un colega, amigo y/o profesional de su sector?</label>
         
         <div class="scale-container">
             <input type="radio" name="nps" id="nps_0" value="0" class="scale-input"><label for="nps_0" class="scale-btn">0</label>
@@ -295,36 +298,36 @@
 
       <!-- PREGUNTA 1.1: Razón -->
       <div class="field">
-        <label for="nps_razon">1.1 Nos gustaría saber la razón principal de su evaluación</label>
+        <label for="nps_razon">Nos gustaría saber la razón principal de su evaluación</label>
         <textarea id="nps_razon" name="nps_razon" rows="3" placeholder="Escriba aquí..." required></textarea>
       </div>
 
       <!-- PREGUNTA 2: CANAL (Condicionante) -->
       <div class="field">
-        <label>2. ¿A través de qué canal hizo su último pedido?</label>
+        <label>¿A través de qué canal hizo su último pedido?</label>
         <div class="options-list">
             <div>
                 <input type="radio" name="canal" id="canal_telefono" value="telefono" class="scale-input" required>
-                <label for="canal_telefono" class="option-btn">2.1 Venta telefónica</label>
+                <label for="canal_telefono" class="option-btn">Venta telefónica</label>
             </div>
             <div>
                 <input type="radio" name="canal" id="canal_terreno" value="terreno" class="scale-input">
-                <label for="canal_terreno" class="option-btn">2.2 Vendedor en terreno</label>
+                <label for="canal_terreno" class="option-btn">Vendedor en terreno</label>
             </div>
             <div>
                 <input type="radio" name="canal" id="canal_web" value="web" class="scale-input">
-                <label for="canal_web" class="option-btn">2.3 Venta a través de la plataforma web</label>
+                <label for="canal_web" class="option-btn">Venta a través de la plataforma web</label>
             </div>
         </div>
       </div>
 
       <!-- PREGUNTA 3: ATRIBUTOS VENTA (Se ocultan/muestran según P2) -->
       <div class="field" id="bloque_venta">
-        <label>3. Pensando en el servicio de venta, ¿cómo calificaría su satisfacción? (1 al 5)</label>
+        <label>Pensando en el servicio de venta, ¿cómo calificaría su satisfacción? (1 al 5)</label>
         
         <!-- 3.1 Amabilidad (Solo Teléfono/Terreno) -->
         <div class="sub-pregunta" id="sub_p3_amabilidad">
-            <span class="sub-label">3.1 Amabilidad del vendedor</span>
+            <span class="sub-label">Amabilidad del vendedor</span>
             <div class="scale-container">
                 <input type="radio" name="p3_1" id="p3_1_1" value="1" class="scale-input"><label for="p3_1_1" class="scale-btn">1</label>
                 <input type="radio" name="p3_1" id="p3_1_2" value="2" class="scale-input"><label for="p3_1_2" class="scale-btn">2</label>
@@ -332,11 +335,12 @@
                 <input type="radio" name="p3_1" id="p3_1_4" value="4" class="scale-input"><label for="p3_1_4" class="scale-btn">4</label>
                 <input type="radio" name="p3_1" id="p3_1_5" value="5" class="scale-input"><label for="p3_1_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
         
         <!-- 3.2 Asesoría (Solo Teléfono/Terreno) -->
         <div class="sub-pregunta" id="sub_p3_asesoria">
-            <span class="sub-label">3.2 Asesoría del vendedor</span>
+            <span class="sub-label">Asesoría del vendedor</span>
             <div class="scale-container">
                 <input type="radio" name="p3_2" id="p3_2_1" value="1" class="scale-input"><label for="p3_2_1" class="scale-btn">1</label>
                 <input type="radio" name="p3_2" id="p3_2_2" value="2" class="scale-input"><label for="p3_2_2" class="scale-btn">2</label>
@@ -344,11 +348,12 @@
                 <input type="radio" name="p3_2" id="p3_2_4" value="4" class="scale-input"><label for="p3_2_4" class="scale-btn">4</label>
                 <input type="radio" name="p3_2" id="p3_2_5" value="5" class="scale-input"><label for="p3_2_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
         
         <!-- 3.3 Web (Solo Web) -->
         <div class="sub-pregunta hidden" id="sub_p3_web">
-            <span class="sub-label">3.3 Facilidad para navegar en la plataforma</span>
+            <span class="sub-label">Facilidad para navegar en la plataforma</span>
             <div class="scale-container">
                 <input type="radio" name="p3_3" id="p3_3_1" value="1" class="scale-input"><label for="p3_3_1" class="scale-btn">1</label>
                 <input type="radio" name="p3_3" id="p3_3_2" value="2" class="scale-input"><label for="p3_3_2" class="scale-btn">2</label>
@@ -356,11 +361,12 @@
                 <input type="radio" name="p3_3" id="p3_3_4" value="4" class="scale-input"><label for="p3_3_4" class="scale-btn">4</label>
                 <input type="radio" name="p3_3" id="p3_3_5" value="5" class="scale-input"><label for="p3_3_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
         
         <!-- 3.4 Stock (Todos) -->
         <div class="sub-pregunta">
-            <span class="sub-label">3.4 Stock de los productos</span>
+            <span class="sub-label">Stock de los productos</span>
             <div class="scale-container">
                 <input type="radio" name="p3_4" id="p3_4_1" value="1" class="scale-input"><label for="p3_4_1" class="scale-btn">1</label>
                 <input type="radio" name="p3_4" id="p3_4_2" value="2" class="scale-input"><label for="p3_4_2" class="scale-btn">2</label>
@@ -368,16 +374,17 @@
                 <input type="radio" name="p3_4" id="p3_4_4" value="4" class="scale-input"><label for="p3_4_4" class="scale-btn">4</label>
                 <input type="radio" name="p3_4" id="p3_4_5" value="5" class="scale-input"><label for="p3_4_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
       </div>
 
       <!-- PREGUNTA 4: PRECIOS -->
       <div class="field">
-        <label>4. Pensando en la compra de su último pedido, ¿cómo calificaría su satisfacción?</label>
+        <label>Pensando en la compra de su último pedido, ¿cómo calificaría su satisfacción?</label>
         
         <!-- 4.1 Precio Medicamentos -->
         <div class="sub-pregunta">
-            <span class="sub-label">4.1 Oferta de precios de los medicamentos</span>
+            <span class="sub-label">Oferta de precios de los medicamentos</span>
             <div class="scale-container">
                 <input type="radio" name="p4_1" id="p4_1_1" value="1" class="scale-input"><label for="p4_1_1" class="scale-btn">1</label>
                 <input type="radio" name="p4_1" id="p4_1_2" value="2" class="scale-input"><label for="p4_1_2" class="scale-btn">2</label>
@@ -385,11 +392,12 @@
                 <input type="radio" name="p4_1" id="p4_1_4" value="4" class="scale-input"><label for="p4_1_4" class="scale-btn">4</label>
                 <input type="radio" name="p4_1" id="p4_1_5" value="5" class="scale-input"><label for="p4_1_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
         
         <!-- 4.2 Precio Belleza -->
         <div class="sub-pregunta">
-            <span class="sub-label">4.2 Oferta de precios de productos Belleza</span>
+            <span class="sub-label">Oferta de precios de productos Belleza y Cuidado Personal</span>
             <div class="scale-container">
                 <input type="radio" name="p4_2" id="p4_2_1" value="1" class="scale-input"><label for="p4_2_1" class="scale-btn">1</label>
                 <input type="radio" name="p4_2" id="p4_2_2" value="2" class="scale-input"><label for="p4_2_2" class="scale-btn">2</label>
@@ -397,30 +405,31 @@
                 <input type="radio" name="p4_2" id="p4_2_4" value="4" class="scale-input"><label for="p4_2_4" class="scale-btn">4</label>
                 <input type="radio" name="p4_2" id="p4_2_5" value="5" class="scale-input"><label for="p4_2_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
       </div>
 
       <!-- PREGUNTA 5: MOTIVO (Oculta por defecto, class="hidden") -->
       <div class="field hidden" id="bloque_motivo_precio">
-        <label>5. ¿Cuál es el principal motivo de su evaluación?</label>
+        <label>¿Cuál es el principal motivo de su evaluación?</label>
         <div class="options-list">
-            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">5.1 Precios más altos que otros proveedores</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">5.2 Falta de descuentos por volumen</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_3" value="Relación precio-calidad" class="scale-input"><label for="m_3" class="option-btn">5.3 Relación precio–calidad poco conveniente</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_4" value="Condiciones comerciales" class="scale-input"><label for="m_4" class="option-btn">5.4 Condiciones comerciales poco competitivas</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">5.5 Variabilidad o falta de estabilidad</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_6" value="Promociones malas" class="scale-input"><label for="m_6" class="option-btn">5.6 Promociones poco atractivas</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">5.7 Otro</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">Precios más altos que otros proveedores</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">Falta de descuentos por volumen</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_3" value="Relación precio-calidad" class="scale-input"><label for="m_3" class="option-btn">Relación precio–calidad poco conveniente</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_4" value="Condiciones comerciales" class="scale-input"><label for="m_4" class="option-btn">Condiciones comerciales poco competitivas</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">Variabilidad o falta de estabilidad</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_6" value="Promociones malas" class="scale-input"><label for="m_6" class="option-btn">Promociones poco atractivas</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">Otro</label></div>
         </div>
         <input type="text" id="motivo_precio_otro" name="motivo_precio_otro" placeholder="Especifique cuál..." class="hidden" style="margin-top:15px;">
       </div>
 
       <!-- PREGUNTA 6: ENTREGA -->
       <div class="field">
-        <label>6. Pensando en el servicio de entrega, ¿cómo calificaría su satisfacción?</label>
+        <label>Pensando en el servicio de entrega, ¿cómo calificaría su satisfacción?</label>
         
         <div class="sub-pregunta">
-            <span class="sub-label">6.1 Tiempo de entrega</span>
+            <span class="sub-label">Tiempo de entrega</span>
             <div class="scale-container">
                 <input type="radio" name="p6_1" id="p6_1_1" value="1" class="scale-input"><label for="p6_1_1" class="scale-btn">1</label>
                 <!-- ... botones intermedios ... -->
@@ -429,10 +438,11 @@
                 <input type="radio" name="p6_1" id="p6_1_4" value="4" class="scale-input"><label for="p6_1_4" class="scale-btn">4</label>
                 <input type="radio" name="p6_1" id="p6_1_5" value="5" class="scale-input"><label for="p6_1_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
         
         <div class="sub-pregunta">
-            <span class="sub-label">6.2 Exactitud del pedido recibido</span>
+            <span class="sub-label">Exactitud del pedido recibido</span>
             <div class="scale-container">
                 <input type="radio" name="p6_2" id="p6_2_1" value="1" class="scale-input"><label for="p6_2_1" class="scale-btn">1</label>
                 <input type="radio" name="p6_2" id="p6_2_2" value="2" class="scale-input"><label for="p6_2_2" class="scale-btn">2</label>
@@ -440,10 +450,11 @@
                 <input type="radio" name="p6_2" id="p6_2_4" value="4" class="scale-input"><label for="p6_2_4" class="scale-btn">4</label>
                 <input type="radio" name="p6_2" id="p6_2_5" value="5" class="scale-input"><label for="p6_2_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
         
         <div class="sub-pregunta">
-            <span class="sub-label">6.3 Estado de los productos (daños/filtraciones)</span>
+            <span class="sub-label">Estado de los productos (daños/filtraciones)</span>
             <div class="scale-container">
                 <input type="radio" name="p6_3" id="p6_3_1" value="1" class="scale-input"><label for="p6_3_1" class="scale-btn">1</label>
                 <input type="radio" name="p6_3" id="p6_3_2" value="2" class="scale-input"><label for="p6_3_2" class="scale-btn">2</label>
@@ -451,12 +462,13 @@
                 <input type="radio" name="p6_3" id="p6_3_4" value="4" class="scale-input"><label for="p6_3_4" class="scale-btn">4</label>
                 <input type="radio" name="p6_3" id="p6_3_5" value="5" class="scale-input"><label for="p6_3_5" class="scale-btn">5</label>
             </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
       </div>
 
       <!-- PREGUNTA 7: ISN (Satisfacción General) -->
       <div class="field">
-        <label>7. En general, ¿cómo calificaría su nivel de satisfacción con el servicio de Provefarma?</label>
+        <label>En general, ¿cómo calificaría su nivel de satisfacción con el servicio de Provefarma?</label>
         <div class="scale-container">
             <input type="radio" name="isn" id="isn_1" value="1" class="scale-input"><label for="isn_1" class="scale-btn">1</label>
             <input type="radio" name="isn" id="isn_2" value="2" class="scale-input"><label for="isn_2" class="scale-btn">2</label>
@@ -465,8 +477,8 @@
             <input type="radio" name="isn" id="isn_5" value="5" class="scale-input"><label for="isn_5" class="scale-btn">5</label>
         </div>
         <div class="scale-legend">
-            <span>Muy Insatisfecho</span>
-            <span>Muy Satisfecho</span>
+            <span>Nada satisfecho</span>
+            <span>Muy satisfecho</span>
         </div>
       </div>
 
@@ -500,5 +512,6 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
