@@ -1,14 +1,12 @@
-// URL de tu Web App (Verifica que sea la que termina en ...9_cjg/exec)
+// URL de tu Web App (Google Apps Script)
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1nofMJ95SIA9TLS1937DTfR5b0MJCZmx0KEwEIOl11povNbyDtuwbPTT35bYOY9_cjg/exec';
-
-
 const ALLOWED_ORIGIN = 'https://encuestasonlineweb.github.io';
 
 const form = document.getElementById('encuestaForm');
 const statusEl = document.getElementById('status');
 const rutInput = document.getElementById('rut');
 
-// --- Utilidades de RUT ---
+// --- Utilidades de RUT (Idéntico a tu versión anterior) ---
 function cleanRut(rut) { return (rut || '').replace(/[^0-9kK]/g, '').toUpperCase(); }
 
 function formatRut(rut) {
@@ -39,7 +37,63 @@ function isValidRut(rut) {
   return dv === dvEsperado;
 }
 
-// --- Eventos de Interfaz ---
+// --- Utilidad para obtener valor de Radio Buttons ---
+function getRadioValue(name) {
+  const selected = document.querySelector(`input[name="${name}"]:checked`);
+  return selected ? selected.value : '';
+}
+
+// --- LÓGICA DE VISIBILIDAD (NUEVO) ---
+function updateVisibility() {
+  // 1. Lógica de Canal (P2 -> P3)
+  const canal = getRadioValue('canal');
+  const bloqueAmabilidad = document.getElementById('sub_p3_amabilidad');
+  const bloqueAsesoria = document.getElementById('sub_p3_asesoria');
+  const bloqueWeb = document.getElementById('sub_p3_web');
+
+  if (canal === 'web') {
+    // Si es Web: Ocultar humano, mostrar web
+    bloqueAmabilidad.classList.add('hidden');
+    bloqueAsesoria.classList.add('hidden');
+    bloqueWeb.classList.remove('hidden');
+  } else if (canal === 'telefono' || canal === 'terreno') {
+    // Si es Humano: Mostrar humano, ocultar web
+    bloqueAmabilidad.classList.remove('hidden');
+    bloqueAsesoria.classList.remove('hidden');
+    bloqueWeb.classList.add('hidden');
+  }
+
+  // 2. Lógica de Precios (P4 -> P5)
+  const p4_1 = parseInt(getRadioValue('p4_1')) || 0;
+  const p4_2 = parseInt(getRadioValue('p4_2')) || 0;
+  
+  // Es detractor si alguna nota de precio es 1 o 2
+  const esDetractorPrecio = (p4_1 > 0 && p4_1 <= 2) || (p4_2 > 0 && p4_2 <= 2);
+  const bloqueMotivo = document.getElementById('bloque_motivo_precio');
+
+  if (esDetractorPrecio) {
+    bloqueMotivo.classList.remove('hidden');
+  } else {
+    bloqueMotivo.classList.add('hidden');
+  }
+
+  // 3. Lógica de "Otro" Motivo (P5 -> Input texto)
+  const motivo = getRadioValue('motivo_precio');
+  const inputOtro = document.getElementById('motivo_precio_otro');
+  
+  if (motivo === 'Otro') {
+    inputOtro.classList.remove('hidden');
+    inputOtro.required = true; // Hacerlo obligatorio si selecciona "Otro"
+  } else {
+    inputOtro.classList.add('hidden');
+    inputOtro.required = false;
+    inputOtro.value = ''; // Limpiar si cambia de opción
+  }
+}
+
+// --- Inicialización de Eventos ---
+
+// 1. Formato RUT en vivo
 if (rutInput) {
   rutInput.addEventListener('input', (e) => {
     e.target.value = formatRut(e.target.value);
@@ -47,11 +101,18 @@ if (rutInput) {
   });
 }
 
+// 2. Escuchar cambios en Radio Buttons para actualizar visibilidad
+const inputsConLogica = document.querySelectorAll('input[type=radio]');
+inputsConLogica.forEach(input => {
+  input.addEventListener('change', updateVisibility);
+});
+
+// 3. Envío del Formulario
 if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Validaciones previas
+    // Validación RUT
     const rutVal = rutInput.value;
     if (!isValidRut(rutVal)) {
       statusEl.textContent = 'RUT inválido. Verifique el dígito verificador.';
@@ -60,38 +121,70 @@ if (form) {
       return;
     }
 
+    // Validación visual de campos requeridos (extra a HTML)
+    const nps = getRadioValue('nps');
+    if (!nps) {
+      statusEl.textContent = 'Por favor, responda la pregunta 1 (NPS).';
+      statusEl.style.color = '#cc1f1a';
+      return;
+    }
+
     statusEl.textContent = 'Enviando respuestas...';
     statusEl.style.color = '#233044';
     const btn = form.querySelector('button');
     btn.disabled = true;
 
-    // Preparamos el objeto de datos
+    // Construcción del objeto de datos (Payload)
+    // Mapeamos todos los campos nuevos
     const payload = {
-      terreno: document.getElementById('terreno').value,
-      callcenter: document.getElementById('callcenter').value,
-      despacho: document.getElementById('despacho').value,
-      comentario: document.getElementById('comentario').value,
+      nps: getRadioValue('nps'),
+      nps_razon: document.getElementById('nps_razon').value,
+      canal: getRadioValue('canal'),
+      
+      // P3 Atributos Venta
+      p3_amabilidad: getRadioValue('p3_1'),
+      p3_asesoria: getRadioValue('p3_2'),
+      p3_web: getRadioValue('p3_3'),
+      p3_stock: getRadioValue('p3_4'),
+      
+      // P4 Precios
+      p4_precio_meds: getRadioValue('p4_1'),
+      p4_precio_belleza: getRadioValue('p4_2'),
+      
+      // P5 Motivo (Si aplica)
+      motivo_precio: getRadioValue('motivo_precio'),
+      motivo_precio_otro: document.getElementById('motivo_precio_otro').value,
+      
+      // P6 Entrega
+      p6_tiempo: getRadioValue('p6_1'),
+      p6_exactitud: getRadioValue('p6_2'),
+      p6_estado: getRadioValue('p6_3'),
+      
+      // ISN y Datos Cliente
+      isn: getRadioValue('isn'),
       rut: cleanRut(rutVal),
       rut_formateado: rutVal,
       origin: ALLOWED_ORIGIN,
-      userAgent: navigator.userAgent
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString()
     };
 
     try {
-      // Usamos 'text/plain' para evitar problemas de CORS con Google Apps Script
       await fetch(GAS_URL, {
         method: 'POST',
-        mode: 'no-cors', // Importante para Google Apps Script
+        mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
 
-      // Como usamos no-cors, no podemos leer la respuesta, pero si llega aquí
-      // es que el navegador logró enviar el paquete.
-      statusEl.textContent = '¡Gracias! Tus respuestas fueron registradas.';
+      statusEl.textContent = '¡Gracias! Tus respuestas fueron registradas correctamente.';
       statusEl.style.color = '#0b6e4f';
       form.reset();
+      
+      // Resetear visibilidad visualmente tras limpiar
+      updateVisibility(); 
       rutInput.classList.remove('is-invalid');
+      
     } catch (err) {
       console.error(err);
       statusEl.textContent = 'Error de conexión. Intente nuevamente.';
@@ -101,6 +194,9 @@ if (form) {
     }
   });
 }
+
+// Ejecutar una vez al inicio para asegurar estado correcto (ej: campos ocultos)
+updateVisibility();
 
 
 
