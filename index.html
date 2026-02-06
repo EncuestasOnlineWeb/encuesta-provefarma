@@ -3,72 +3,500 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Encuesta de Satisfacción – Provefarma</title>
-  <link rel="stylesheet" href="styles.css" />
-  <meta name="color-scheme" content="light" />
+  <title>Encuesta de Satisfacción – Provefarma Distribución</title>
+  
+  <style>
+    :root {
+      /* Variables originales de tu marca */
+      --bg: #f9fafb;
+      --primary: #1f57a8;       /* Azul Provefarma */
+      --primary-hover: #15417d;
+      --accent: #f4bb00;        /* Amarillo corporativo */
+      --accent-light: #fff9c4;  /* Amarillo clarito para selecciones */
+      --text: #233044;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --error: #cc1f1a;
+      --success: #0b6e4f;
+      --white: #ffffff;
+      --border-radius: 8px;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 700px;
+      width: 100%;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+
+    /* Banda y Cabecera */
+    .brand-bar {
+      height: 6px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      margin: -30px -30px 20px -30px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo { 
+      height: 50px; 
+      margin-bottom: 10px; 
+      max-width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    /* Campos del formulario */
+    .field {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #fff;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border);
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .sub-label {
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 8px;
+      display: block;
+      color: var(--text);
+    }
+
+    /* Inputs de texto básicos */
+    select, textarea, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    input.is-invalid {
+      border-color: var(--error);
+      background-color: #fff5f5;
+    }
+
+    /* --- ESTILOS NUEVOS: BOTONES DE ESCALA (0-10 y 1-5) --- */
+
+    /* Ocultar el radio button nativo */
+    .scale-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* Contenedor flexible */
+    .scale-container {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap; 
+      justify-content: flex-start;
+    }
+
+    /* Estilo del botón numérico */
+    .scale-btn {
+      flex: 1;
+      min-width: 35px;
+      text-align: center;
+      padding: 12px 5px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background-color: var(--white);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .scale-btn:hover {
+      background-color: #f0f7ff;
+      border-color: var(--primary);
+    }
+
+    /* Estado Seleccionado (Radio checked) */
+    .scale-input:checked + .scale-btn {
+      background-color: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .scale-legend {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* --- ESTILOS NUEVOS: BOTONES GRANDES (Canal y Motivos) --- */
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-btn {
+      display: block;
+      padding: 14px 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fdfdfd;
+      transition: background 0.2s, border-color 0.2s;
+      font-weight: 500;
+    }
+
+    .option-btn:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    /* Estado Seleccionado: Amarillo clarito */
+    .scale-input:checked + .option-btn {
+      background-color: var(--accent-light); /* Amarillo suave */
+      border-color: var(--accent);           /* Borde amarillo oscuro/dorado */
+      color: var(--text);
+      font-weight: 700;
+      box-shadow: inset 0 0 0 1px var(--accent); /* Borde doble sutil */
+    }
+
+    /* Sub-preguntas y utilidades */
+    .sub-pregunta {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .sub-pregunta:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* Clase para ocultar elementos (Lógica JS) */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Botón de envío y footer */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover { background-color: var(--primary-hover); }
+    .btn:disabled { background-color: var(--muted); cursor: not-allowed; }
+
+    #status { margin-top: 15px; font-weight: 500; text-align: center; }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
 </head>
+
 <body>
   <main class="container">
+
+    <!-- Banda corporativa y Logo -->
     <div class="brand-bar"></div>
-    <div class="brand-header">
+    <div class="brand-header" aria-label="Provefarma">
       <img src="Provefarma_img1.png" alt="Provefarma" class="logo" />
     </div>
 
     <header>
       <h1>Encuesta de Satisfacción</h1>
-      <p>Tu opinión nos ayuda a mejorar. Gracias por tu tiempo.</p>
+      <p>Estimado cliente, queremos conocer su experiencia con el servicio entregado por Provefarma en el último pedido que recibió.</p>
     </header>
 
     <form id="encuestaForm" novalidate>
+
+      <!-- PREGUNTA 1: NPS (0-10) -->
       <div class="field">
-        <label for="terreno">1. Nota a la atención del vendedor de terreno</label>
-        <select id="terreno" name="terreno" required>
-          <option value="">Selecciona…</option>
-          <option>1</option><option>2</option><option>3</option>
-          <option>4</option><option>5</option><option>6</option><option>7</option>
-        </select>
-        <small class="hint">1 = Muy malo, 7 = Excelente</small>
+        <label>1. En base a su última experiencia, ¿qué tan probable es que recomiende Provefarma a un colega, amigo y/o profesional de su sector?</label>
+        
+        <div class="scale-container">
+            <input type="radio" name="nps" id="nps_0" value="0" class="scale-input"><label for="nps_0" class="scale-btn">0</label>
+            <input type="radio" name="nps" id="nps_1" value="1" class="scale-input"><label for="nps_1" class="scale-btn">1</label>
+            <input type="radio" name="nps" id="nps_2" value="2" class="scale-input"><label for="nps_2" class="scale-btn">2</label>
+            <input type="radio" name="nps" id="nps_3" value="3" class="scale-input"><label for="nps_3" class="scale-btn">3</label>
+            <input type="radio" name="nps" id="nps_4" value="4" class="scale-input"><label for="nps_4" class="scale-btn">4</label>
+            <input type="radio" name="nps" id="nps_5" value="5" class="scale-input"><label for="nps_5" class="scale-btn">5</label>
+            <input type="radio" name="nps" id="nps_6" value="6" class="scale-input"><label for="nps_6" class="scale-btn">6</label>
+            <input type="radio" name="nps" id="nps_7" value="7" class="scale-input"><label for="nps_7" class="scale-btn">7</label>
+            <input type="radio" name="nps" id="nps_8" value="8" class="scale-input"><label for="nps_8" class="scale-btn">8</label>
+            <input type="radio" name="nps" id="nps_9" value="9" class="scale-input"><label for="nps_9" class="scale-btn">9</label>
+            <input type="radio" name="nps" id="nps_10" value="10" class="scale-input"><label for="nps_10" class="scale-btn">10</label>
+        </div>
+        <div class="scale-legend">
+            <span>Nada probable</span>
+            <span>Muy probable</span>
+        </div>
       </div>
 
+      <!-- PREGUNTA 1.1: Razón -->
       <div class="field">
-        <label for="callcenter">2. Nota a la atención del vendedor de call center</label>
-        <select id="callcenter" name="callcenter" required>
-          <option value="">Selecciona…</option>
-          <option>1</option><option>2</option><option>3</option>
-          <option>4</option><option>5</option><option>6</option><option>7</option>
-        </select>
-        <small class="hint">1 = Muy malo, 7 = Excelente</small>
+        <label for="nps_razon">1.1 Nos gustaría saber la razón principal de su evaluación</label>
+        <textarea id="nps_razon" name="nps_razon" rows="3" placeholder="Escriba aquí..." required></textarea>
       </div>
 
+      <!-- PREGUNTA 2: CANAL (Condicionante) -->
       <div class="field">
-        <label for="despacho">3. Nota a la gestión de despacho</label>
-        <select id="despacho" name="despacho" required>
-          <option value="">Selecciona…</option>
-          <option>1</option><option>2</option><option>3</option>
-          <option>4</option><option>5</option><option>6</option><option>7</option>
-        </select>
-        <small class="hint">1 = Muy malo, 7 = Excelente</small>
+        <label>2. ¿A través de qué canal hizo su último pedido?</label>
+        <div class="options-list">
+            <div>
+                <input type="radio" name="canal" id="canal_telefono" value="telefono" class="scale-input" required>
+                <label for="canal_telefono" class="option-btn">2.1 Venta telefónica</label>
+            </div>
+            <div>
+                <input type="radio" name="canal" id="canal_terreno" value="terreno" class="scale-input">
+                <label for="canal_terreno" class="option-btn">2.2 Vendedor en terreno</label>
+            </div>
+            <div>
+                <input type="radio" name="canal" id="canal_web" value="web" class="scale-input">
+                <label for="canal_web" class="option-btn">2.3 Venta a través de la plataforma web</label>
+            </div>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="comentario">4. Comentarios sobre la gestión</label>
-        <textarea id="comentario" name="comentario" rows="4" placeholder="Escribe aquí..."></textarea>
+      <!-- PREGUNTA 3: ATRIBUTOS VENTA (Se ocultan/muestran según P2) -->
+      <div class="field" id="bloque_venta">
+        <label>3. Pensando en el servicio de venta, ¿cómo calificaría su satisfacción? (1 al 5)</label>
+        
+        <!-- 3.1 Amabilidad (Solo Teléfono/Terreno) -->
+        <div class="sub-pregunta" id="sub_p3_amabilidad">
+            <span class="sub-label">3.1 Amabilidad del vendedor</span>
+            <div class="scale-container">
+                <input type="radio" name="p3_1" id="p3_1_1" value="1" class="scale-input"><label for="p3_1_1" class="scale-btn">1</label>
+                <input type="radio" name="p3_1" id="p3_1_2" value="2" class="scale-input"><label for="p3_1_2" class="scale-btn">2</label>
+                <input type="radio" name="p3_1" id="p3_1_3" value="3" class="scale-input"><label for="p3_1_3" class="scale-btn">3</label>
+                <input type="radio" name="p3_1" id="p3_1_4" value="4" class="scale-input"><label for="p3_1_4" class="scale-btn">4</label>
+                <input type="radio" name="p3_1" id="p3_1_5" value="5" class="scale-input"><label for="p3_1_5" class="scale-btn">5</label>
+            </div>
+        </div>
+        
+        <!-- 3.2 Asesoría (Solo Teléfono/Terreno) -->
+        <div class="sub-pregunta" id="sub_p3_asesoria">
+            <span class="sub-label">3.2 Asesoría del vendedor</span>
+            <div class="scale-container">
+                <input type="radio" name="p3_2" id="p3_2_1" value="1" class="scale-input"><label for="p3_2_1" class="scale-btn">1</label>
+                <input type="radio" name="p3_2" id="p3_2_2" value="2" class="scale-input"><label for="p3_2_2" class="scale-btn">2</label>
+                <input type="radio" name="p3_2" id="p3_2_3" value="3" class="scale-input"><label for="p3_2_3" class="scale-btn">3</label>
+                <input type="radio" name="p3_2" id="p3_2_4" value="4" class="scale-input"><label for="p3_2_4" class="scale-btn">4</label>
+                <input type="radio" name="p3_2" id="p3_2_5" value="5" class="scale-input"><label for="p3_2_5" class="scale-btn">5</label>
+            </div>
+        </div>
+        
+        <!-- 3.3 Web (Solo Web) -->
+        <div class="sub-pregunta hidden" id="sub_p3_web">
+            <span class="sub-label">3.3 Facilidad para navegar en la plataforma</span>
+            <div class="scale-container">
+                <input type="radio" name="p3_3" id="p3_3_1" value="1" class="scale-input"><label for="p3_3_1" class="scale-btn">1</label>
+                <input type="radio" name="p3_3" id="p3_3_2" value="2" class="scale-input"><label for="p3_3_2" class="scale-btn">2</label>
+                <input type="radio" name="p3_3" id="p3_3_3" value="3" class="scale-input"><label for="p3_3_3" class="scale-btn">3</label>
+                <input type="radio" name="p3_3" id="p3_3_4" value="4" class="scale-input"><label for="p3_3_4" class="scale-btn">4</label>
+                <input type="radio" name="p3_3" id="p3_3_5" value="5" class="scale-input"><label for="p3_3_5" class="scale-btn">5</label>
+            </div>
+        </div>
+        
+        <!-- 3.4 Stock (Todos) -->
+        <div class="sub-pregunta">
+            <span class="sub-label">3.4 Stock de los productos</span>
+            <div class="scale-container">
+                <input type="radio" name="p3_4" id="p3_4_1" value="1" class="scale-input"><label for="p3_4_1" class="scale-btn">1</label>
+                <input type="radio" name="p3_4" id="p3_4_2" value="2" class="scale-input"><label for="p3_4_2" class="scale-btn">2</label>
+                <input type="radio" name="p3_4" id="p3_4_3" value="3" class="scale-input"><label for="p3_4_3" class="scale-btn">3</label>
+                <input type="radio" name="p3_4" id="p3_4_4" value="4" class="scale-input"><label for="p3_4_4" class="scale-btn">4</label>
+                <input type="radio" name="p3_4" id="p3_4_5" value="5" class="scale-input"><label for="p3_4_5" class="scale-btn">5</label>
+            </div>
+        </div>
       </div>
 
+      <!-- PREGUNTA 4: PRECIOS -->
       <div class="field">
-        <label for="rut">5. RUT de la empresa</label>
-        <input type="text" id="rut" name="rut" placeholder="Ej: 12.345.678-9" required />
-        <small id="rutHint" class="hint">Formato: 12.345.678-9. Incluye dígito verificador.</small>
+        <label>4. Pensando en la compra de su último pedido, ¿cómo calificaría su satisfacción?</label>
+        
+        <!-- 4.1 Precio Medicamentos -->
+        <div class="sub-pregunta">
+            <span class="sub-label">4.1 Oferta de precios de los medicamentos</span>
+            <div class="scale-container">
+                <input type="radio" name="p4_1" id="p4_1_1" value="1" class="scale-input"><label for="p4_1_1" class="scale-btn">1</label>
+                <input type="radio" name="p4_1" id="p4_1_2" value="2" class="scale-input"><label for="p4_1_2" class="scale-btn">2</label>
+                <input type="radio" name="p4_1" id="p4_1_3" value="3" class="scale-input"><label for="p4_1_3" class="scale-btn">3</label>
+                <input type="radio" name="p4_1" id="p4_1_4" value="4" class="scale-input"><label for="p4_1_4" class="scale-btn">4</label>
+                <input type="radio" name="p4_1" id="p4_1_5" value="5" class="scale-input"><label for="p4_1_5" class="scale-btn">5</label>
+            </div>
+        </div>
+        
+        <!-- 4.2 Precio Belleza -->
+        <div class="sub-pregunta">
+            <span class="sub-label">4.2 Oferta de precios de productos Belleza</span>
+            <div class="scale-container">
+                <input type="radio" name="p4_2" id="p4_2_1" value="1" class="scale-input"><label for="p4_2_1" class="scale-btn">1</label>
+                <input type="radio" name="p4_2" id="p4_2_2" value="2" class="scale-input"><label for="p4_2_2" class="scale-btn">2</label>
+                <input type="radio" name="p4_2" id="p4_2_3" value="3" class="scale-input"><label for="p4_2_3" class="scale-btn">3</label>
+                <input type="radio" name="p4_2" id="p4_2_4" value="4" class="scale-input"><label for="p4_2_4" class="scale-btn">4</label>
+                <input type="radio" name="p4_2" id="p4_2_5" value="5" class="scale-input"><label for="p4_2_5" class="scale-btn">5</label>
+            </div>
+        </div>
       </div>
 
+      <!-- PREGUNTA 5: MOTIVO (Oculta por defecto, class="hidden") -->
+      <div class="field hidden" id="bloque_motivo_precio">
+        <label>5. ¿Cuál es el principal motivo de su evaluación?</label>
+        <div class="options-list">
+            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">5.1 Precios más altos que otros proveedores</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">5.2 Falta de descuentos por volumen</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_3" value="Relación precio-calidad" class="scale-input"><label for="m_3" class="option-btn">5.3 Relación precio–calidad poco conveniente</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_4" value="Condiciones comerciales" class="scale-input"><label for="m_4" class="option-btn">5.4 Condiciones comerciales poco competitivas</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">5.5 Variabilidad o falta de estabilidad</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_6" value="Promociones malas" class="scale-input"><label for="m_6" class="option-btn">5.6 Promociones poco atractivas</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">5.7 Otro</label></div>
+        </div>
+        <input type="text" id="motivo_precio_otro" name="motivo_precio_otro" placeholder="Especifique cuál..." class="hidden" style="margin-top:15px;">
+      </div>
+
+      <!-- PREGUNTA 6: ENTREGA -->
+      <div class="field">
+        <label>6. Pensando en el servicio de entrega, ¿cómo calificaría su satisfacción?</label>
+        
+        <div class="sub-pregunta">
+            <span class="sub-label">6.1 Tiempo de entrega</span>
+            <div class="scale-container">
+                <input type="radio" name="p6_1" id="p6_1_1" value="1" class="scale-input"><label for="p6_1_1" class="scale-btn">1</label>
+                <!-- ... botones intermedios ... -->
+                <input type="radio" name="p6_1" id="p6_1_2" value="2" class="scale-input"><label for="p6_1_2" class="scale-btn">2</label>
+                <input type="radio" name="p6_1" id="p6_1_3" value="3" class="scale-input"><label for="p6_1_3" class="scale-btn">3</label>
+                <input type="radio" name="p6_1" id="p6_1_4" value="4" class="scale-input"><label for="p6_1_4" class="scale-btn">4</label>
+                <input type="radio" name="p6_1" id="p6_1_5" value="5" class="scale-input"><label for="p6_1_5" class="scale-btn">5</label>
+            </div>
+        </div>
+        
+        <div class="sub-pregunta">
+            <span class="sub-label">6.2 Exactitud del pedido recibido</span>
+            <div class="scale-container">
+                <input type="radio" name="p6_2" id="p6_2_1" value="1" class="scale-input"><label for="p6_2_1" class="scale-btn">1</label>
+                <input type="radio" name="p6_2" id="p6_2_2" value="2" class="scale-input"><label for="p6_2_2" class="scale-btn">2</label>
+                <input type="radio" name="p6_2" id="p6_2_3" value="3" class="scale-input"><label for="p6_2_3" class="scale-btn">3</label>
+                <input type="radio" name="p6_2" id="p6_2_4" value="4" class="scale-input"><label for="p6_2_4" class="scale-btn">4</label>
+                <input type="radio" name="p6_2" id="p6_2_5" value="5" class="scale-input"><label for="p6_2_5" class="scale-btn">5</label>
+            </div>
+        </div>
+        
+        <div class="sub-pregunta">
+            <span class="sub-label">6.3 Estado de los productos (daños/filtraciones)</span>
+            <div class="scale-container">
+                <input type="radio" name="p6_3" id="p6_3_1" value="1" class="scale-input"><label for="p6_3_1" class="scale-btn">1</label>
+                <input type="radio" name="p6_3" id="p6_3_2" value="2" class="scale-input"><label for="p6_3_2" class="scale-btn">2</label>
+                <input type="radio" name="p6_3" id="p6_3_3" value="3" class="scale-input"><label for="p6_3_3" class="scale-btn">3</label>
+                <input type="radio" name="p6_3" id="p6_3_4" value="4" class="scale-input"><label for="p6_3_4" class="scale-btn">4</label>
+                <input type="radio" name="p6_3" id="p6_3_5" value="5" class="scale-input"><label for="p6_3_5" class="scale-btn">5</label>
+            </div>
+        </div>
+      </div>
+
+      <!-- PREGUNTA 7: ISN (Satisfacción General) -->
+      <div class="field">
+        <label>7. En general, ¿cómo calificaría su nivel de satisfacción con el servicio de Provefarma?</label>
+        <div class="scale-container">
+            <input type="radio" name="isn" id="isn_1" value="1" class="scale-input"><label for="isn_1" class="scale-btn">1</label>
+            <input type="radio" name="isn" id="isn_2" value="2" class="scale-input"><label for="isn_2" class="scale-btn">2</label>
+            <input type="radio" name="isn" id="isn_3" value="3" class="scale-input"><label for="isn_3" class="scale-btn">3</label>
+            <input type="radio" name="isn" id="isn_4" value="4" class="scale-input"><label for="isn_4" class="scale-btn">4</label>
+            <input type="radio" name="isn" id="isn_5" value="5" class="scale-input"><label for="isn_5" class="scale-btn">5</label>
+        </div>
+        <div class="scale-legend">
+            <span>Muy Insatisfecho</span>
+            <span>Muy Satisfecho</span>
+        </div>
+      </div>
+
+      <!-- RUT Empresa (Vital para identificar al cliente) -->
+      <div class="field">
+        <label for="rut">RUT de la empresa</label>
+        <input 
+          type="text" 
+          id="rut" 
+          name="rut" 
+          placeholder="Ej: 12.345.678-9" 
+          autocomplete="off" 
+          required
+        >
+        <small class="hint">Formato sugerido: 12.345.678-9 (Incluye dígito verificador)</small>
+      </div>
+
+      <!-- Botón Enviar -->
       <button type="submit" class="btn">Enviar respuestas</button>
       <p id="status" role="status" aria-live="polite"></p>
+
     </form>
 
     <footer>
-      <small>Los datos se utilizarán para mejorar nuestro servicio.</small>
+      <small>Sus comentarios nos ayudan a seguir mejorando. <br>Los datos son confidenciales.</small>
     </footer>
+
   </main>
+
+  <!-- Lógica de la encuesta -->
   <script src="script.js"></script>
 </body>
 </html>
