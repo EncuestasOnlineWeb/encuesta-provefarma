@@ -120,7 +120,7 @@
       background-color: #fff5f5;
     }
 
-    /* --- ESTILOS: BOTONES DE ESCALA (0-10 y 1-5) --- */
+    /* --- ESTILOS MEJORADOS: BOTONES DE ESCALA (0-10 y 1-5) --- */
 
     /* Ocultar el radio button nativo */
     .scale-input {
@@ -130,28 +130,35 @@
       height: 0;
     }
 
-    /* Contenedor flexible */
+    /* Contenedor flexible centrado */
     .scale-container {
       display: flex;
-      gap: 5px;
+      gap: 8px; /* Un poco más de espacio entre botones */
       flex-wrap: wrap; 
-      justify-content: flex-start;
+      justify-content: center; /* Centra los botones en móvil */
     }
 
-    /* Estilo del botón numérico */
+    /* Estilo del botón numérico FIJO */
     .scale-btn {
-      flex: 1;
-      min-width: 35px;
-      text-align: center;
-      padding: 12px 5px;
+      /* flex: 1;  <-- ELIMINADO para evitar el estiramiento desigual */
+      flex: 0 0 45px; /* Tamaño fijo: no crece ni encoge */
+      width: 45px;
+      height: 45px;
+      
+      /* Centrado perfecto del número */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      padding: 0; /* Sin padding interno para mantener tamaño */
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px; /* Bordes redondeados suaves */
       background-color: var(--white);
       color: var(--text);
       cursor: pointer;
       transition: all 0.2s ease;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .scale-btn:hover {
@@ -164,14 +171,15 @@
       background-color: var(--primary);
       color: var(--white);
       border-color: var(--primary);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transform: translateY(-1px); /* Pequeño efecto de elevación */
     }
 
     .scale-legend {
       display: flex;
       justify-content: space-between;
       margin-top: 8px;
-      font-size: 0.75rem; /* Un poco más pequeño para las sub-preguntas */
+      font-size: 0.75rem; 
       color: var(--muted);
       font-weight: 500;
       text-transform: uppercase;
@@ -253,6 +261,18 @@
       margin-top: 40px;
       font-size: 0.85rem;
       color: var(--muted);
+    }
+    
+    /* Ajuste para pantallas muy pequeñas */
+    @media (max-width: 400px) {
+      .container {
+        padding: 20px 15px; /* Menos padding lateral en móvil */
+      }
+      .scale-btn {
+        flex: 0 0 40px; /* Ligeramente más pequeños si la pantalla es muy angosta */
+        width: 40px;
+        height: 40px;
+      }
     }
   </style>
 </head>
@@ -380,7 +400,7 @@
 
       <!-- PREGUNTA 4: PRECIOS -->
       <div class="field">
-        <label>Pensando en la compra de su último pedido, ¿cómo calificaría su satisfacción con los siguientes aspectos?</label>
+        <label>Pensando en la compra de su último pedido, ¿cómo calificaría su satisfacción?</label>
         
         <!-- 4.1 Precio Medicamentos -->
         <div class="sub-pregunta">
@@ -413,20 +433,20 @@
       <div class="field hidden" id="bloque_motivo_precio">
         <label>¿Cuál es el principal motivo de su evaluación?</label>
         <div class="options-list">
-            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">Precios más altos en comparación con otros proveedores</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">Falta de descuentos o beneficios por volumen de compra</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">Precios más altos que otros proveedores</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">Falta de descuentos por volumen</label></div>
             <div><input type="radio" name="motivo_precio" id="m_3" value="Relación precio-calidad" class="scale-input"><label for="m_3" class="option-btn">Relación precio–calidad poco conveniente</label></div>
             <div><input type="radio" name="motivo_precio" id="m_4" value="Condiciones comerciales" class="scale-input"><label for="m_4" class="option-btn">Condiciones comerciales poco competitivas</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">Variabilidad o falta de estabilidad en los precios</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_6" value="Promociones malas" class="scale-input"><label for="m_6" class="option-btn">Promociones o beneficios poco atractivos</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">Otro, ¿cuál?</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">Variabilidad o falta de estabilidad</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_6" value="Promociones malas" class="scale-input"><label for="m_6" class="option-btn">Promociones poco atractivas</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">Otro</label></div>
         </div>
         <input type="text" id="motivo_precio_otro" name="motivo_precio_otro" placeholder="Especifique cuál..." class="hidden" style="margin-top:15px;">
       </div>
 
       <!-- PREGUNTA 6: ENTREGA -->
       <div class="field">
-        <label>Pensando en el servicio de entrega, ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
+        <label>Pensando en el servicio de entrega, ¿cómo calificaría su satisfacción?</label>
         
         <div class="sub-pregunta">
             <span class="sub-label">Tiempo de entrega</span>
@@ -454,7 +474,7 @@
         </div>
         
         <div class="sub-pregunta">
-            <span class="sub-label">Estado de los productos recibidos (sin filtraciones ni daños)</span>
+            <span class="sub-label">Estado de los productos (daños/filtraciones)</span>
             <div class="scale-container">
                 <input type="radio" name="p6_3" id="p6_3_1" value="1" class="scale-input"><label for="p6_3_1" class="scale-btn">1</label>
                 <input type="radio" name="p6_3" id="p6_3_2" value="2" class="scale-input"><label for="p6_3_2" class="scale-btn">2</label>
@@ -503,7 +523,7 @@
     </form>
 
     <footer>
-      <small>Sus comentarios nos ayudan a seguir mejorando su experiencia y la de todos nuestros clientes <br>Los datos son confidenciales.</small>
+      <small>Sus comentarios nos ayudan a seguir mejorando. <br>Los datos son confidenciales.</small>
     </footer>
 
   </main>
@@ -512,6 +532,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
