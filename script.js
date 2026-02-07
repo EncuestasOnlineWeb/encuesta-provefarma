@@ -1,5 +1,5 @@
-// URL de tu Web App (Google Apps Script)
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1nofMJ95SIA9TLS1937DTfR5b0MJCZmx0KEwEIOl11povNbyDtuwbPTT35bYOY9_cjg/exec';
+// URL de tu Web App (ACTUALIZADA)
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzQOXlezeiJqTw5XkCxpUvqmAarwNBshAQbCgYU-8SQqDlkIZf4qa74F_VodpUEhmitOQ/exec';
 const ALLOWED_ORIGIN = 'https://encuestasonlineweb.github.io';
 
 const form = document.getElementById('encuestaForm');
@@ -43,7 +43,7 @@ function getRadioValue(name) {
   return selected ? selected.value : '';
 }
 
-// --- LÓGICA DE VISIBILIDAD (ACTUALIZADA) ---
+// --- LÓGICA DE VISIBILIDAD ---
 function updateVisibility() {
   // 1. Lógica de Canal (P2 -> P3)
   const canal = getRadioValue('canal');
@@ -56,16 +56,16 @@ function updateVisibility() {
     // CASO WEB: Ocultar todo lo humano Y el stock. Mostrar solo Web.
     if(bloqueAmabilidad) bloqueAmabilidad.classList.add('hidden');
     if(bloqueAsesoria) bloqueAsesoria.classList.add('hidden');
-    if(bloqueStock) bloqueStock.classList.add('hidden'); // Ocultamos Stock también
+    if(bloqueStock) bloqueStock.classList.add('hidden'); 
     if(bloqueWeb) bloqueWeb.classList.remove('hidden');
   } else if (canal === 'telefono' || canal === 'terreno') {
     // CASO HUMANO: Mostrar humano y stock. Ocultar web.
     if(bloqueAmabilidad) bloqueAmabilidad.classList.remove('hidden');
     if(bloqueAsesoria) bloqueAsesoria.classList.remove('hidden');
-    if(bloqueStock) bloqueStock.classList.remove('hidden'); // Mostramos Stock
+    if(bloqueStock) bloqueStock.classList.remove('hidden');
     if(bloqueWeb) bloqueWeb.classList.add('hidden');
   }
-  // Si no hay selección, mantenemos el estado default del HTML
+  // Si no hay selección, mantenemos el estado default
 
   // 2. Lógica de Precios (P4 -> P5)
   const p4_1 = parseInt(getRadioValue('p4_1')) || 0;
@@ -204,6 +204,7 @@ if (form) {
 
 // Ejecutar al inicio para asegurar estado visual correcto
 updateVisibility();
+
 
 
 
