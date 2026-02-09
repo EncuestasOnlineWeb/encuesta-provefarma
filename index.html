@@ -353,7 +353,7 @@
 
       <!-- PREGUNTA 3: ATRIBUTOS VENTA (Se ocultan/muestran según P2) -->
       <div class="field" id="bloque_venta">
-        <label>Pensando en el servicio de venta que recibió por ese canal, en una escala de 1 a 5 ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
+        <label>Pensando en el servicio de venta que recibió por ese canal, ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
         
         <!-- 3.1 Amabilidad (Solo Teléfono/Terreno) -->
         <div class="sub-pregunta" id="sub_p3_amabilidad">
@@ -411,7 +411,7 @@
 
       <!-- PREGUNTA 4: PRECIOS -->
       <div class="field">
-        <label>Pensando en la compra de su último pedido, ¿cómo calificaría su satisfacción?</label>
+        <label>Pensando en la compra de su último pedido, ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
         
         <!-- 4.1 Precio Medicamentos -->
         <div class="sub-pregunta">
@@ -428,7 +428,7 @@
         
         <!-- 4.2 Precio Belleza -->
         <div class="sub-pregunta">
-            <span class="sub-label">Oferta de precios de productos Belleza y Cuidado Personal</span>
+            <span class="sub-label">Oferta de precios de los productos Belleza y Cuidado Personal</span>
             <div class="scale-grid-5">
                 <input type="radio" name="p4_2" id="p4_2_1" value="1" class="scale-input"><label for="p4_2_1" class="scale-btn">1</label>
                 <input type="radio" name="p4_2" id="p4_2_2" value="2" class="scale-input"><label for="p4_2_2" class="scale-btn">2</label>
@@ -444,20 +444,20 @@
       <div class="field hidden" id="bloque_motivo_precio">
         <label>¿Cuál es el principal motivo de su evaluación?</label>
         <div class="options-list">
-            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">Precios más altos que otros proveedores</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">Falta de descuentos por volumen</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_1" value="Precios altos" class="scale-input"><label for="m_1" class="option-btn">Precios más altos en comparación con otros proveedores</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_2" value="Falta descuentos" class="scale-input"><label for="m_2" class="option-btn">Falta de descuentos o beneficios por volumen de compra</label></div>
             <div><input type="radio" name="motivo_precio" id="m_3" value="Relación precio-calidad" class="scale-input"><label for="m_3" class="option-btn">Relación precio–calidad poco conveniente</label></div>
             <div><input type="radio" name="motivo_precio" id="m_4" value="Condiciones comerciales" class="scale-input"><label for="m_4" class="option-btn">Condiciones comerciales poco competitivas</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">Variabilidad o falta de estabilidad</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_5" value="Inestabilidad precios" class="scale-input"><label for="m_5" class="option-btn">Variabilidad o falta de estabilidad en los precios</label></div>
             <div><input type="radio" name="motivo_precio" id="m_6" value="Promociones malas" class="scale-input"><label for="m_6" class="option-btn">Promociones poco atractivas</label></div>
-            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">Otro</label></div>
+            <div><input type="radio" name="motivo_precio" id="m_7" value="Otro" class="scale-input"><label for="m_7" class="option-btn">Otro, ¿cuál?</label></div>
         </div>
         <input type="text" id="motivo_precio_otro" name="motivo_precio_otro" placeholder="Especifique cuál..." class="hidden" style="margin-top:15px;">
       </div>
 
       <!-- PREGUNTA 6: ENTREGA -->
       <div class="field">
-        <label>Pensando en el servicio de entrega, ¿cómo calificaría su satisfacción?</label>
+        <label>Pensando en el servicio de entrega, ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
         
         <div class="sub-pregunta">
             <span class="sub-label">Tiempo de entrega</span>
@@ -485,7 +485,7 @@
         </div>
         
         <div class="sub-pregunta">
-            <span class="sub-label">Estado de los productos (daños/filtraciones)</span>
+            <span class="sub-label">Estado de los productos recibidos (sin filtraciones ni daños)</span>
             <div class="scale-grid-5">
                 <input type="radio" name="p6_3" id="p6_3_1" value="1" class="scale-input"><label for="p6_3_1" class="scale-btn">1</label>
                 <input type="radio" name="p6_3" id="p6_3_2" value="2" class="scale-input"><label for="p6_3_2" class="scale-btn">2</label>
@@ -534,7 +534,7 @@
     </form>
 
     <footer>
-      <small>Sus comentarios nos ayudan a seguir mejorando. <br>Los datos son confidenciales.</small>
+      <small>Sus comentarios nos ayudan a seguir mejorando su experiencia y la de todos nuestros clientes <br>Los datos son confidenciales.</small>
     </footer>
 
   </main>
@@ -543,6 +543,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
