@@ -1,4 +1,4 @@
-// URL de tu Web App (ACTUALIZADA)
+// URL de tu Web App (Google Apps Script)
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzQOXlezeiJqTw5XkCxpUvqmAarwNBshAQbCgYU-8SQqDlkIZf4qa74F_VodpUEhmitOQ/exec';
 const ALLOWED_ORIGIN = 'https://encuestasonlineweb.github.io';
 
@@ -43,7 +43,7 @@ function getRadioValue(name) {
   return selected ? selected.value : '';
 }
 
-// --- LÓGICA DE VISIBILIDAD ---
+// --- LÓGICA DE VISIBILIDAD (CORREGIDA) ---
 function updateVisibility() {
   // 1. Lógica de Canal (P2 -> P3)
   const canal = getRadioValue('canal');
@@ -53,19 +53,26 @@ function updateVisibility() {
   const bloqueStock = document.getElementById('sub_p3_stock');
 
   if (canal === 'web') {
-    // CASO WEB: Ocultar todo lo humano Y el stock. Mostrar solo Web.
+    // CASO WEB: 
+    // Ocultar preguntas humanas (Amabilidad, Asesoría)
     if(bloqueAmabilidad) bloqueAmabilidad.classList.add('hidden');
     if(bloqueAsesoria) bloqueAsesoria.classList.add('hidden');
-    if(bloqueStock) bloqueStock.classList.add('hidden'); 
+    
+    // Mostrar Web y Mostrar Stock (Corrección aquí: Stock visible)
     if(bloqueWeb) bloqueWeb.classList.remove('hidden');
+    if(bloqueStock) bloqueStock.classList.remove('hidden'); 
+
   } else if (canal === 'telefono' || canal === 'terreno') {
-    // CASO HUMANO: Mostrar humano y stock. Ocultar web.
+    // CASO HUMANO:
+    // Mostrar preguntas humanas
     if(bloqueAmabilidad) bloqueAmabilidad.classList.remove('hidden');
     if(bloqueAsesoria) bloqueAsesoria.classList.remove('hidden');
-    if(bloqueStock) bloqueStock.classList.remove('hidden');
+    
+    // Ocultar Web, pero Mostrar Stock
     if(bloqueWeb) bloqueWeb.classList.add('hidden');
+    if(bloqueStock) bloqueStock.classList.remove('hidden');
   }
-  // Si no hay selección, mantenemos el estado default
+  // Si no hay selección, se mantiene el estado inicial del HTML.
 
   // 2. Lógica de Precios (P4 -> P5)
   const p4_1 = parseInt(getRadioValue('p4_1')) || 0;
@@ -204,6 +211,7 @@ if (form) {
 
 // Ejecutar al inicio para asegurar estado visual correcto
 updateVisibility();
+
 
 
 
