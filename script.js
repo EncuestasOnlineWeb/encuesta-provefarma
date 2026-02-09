@@ -43,34 +43,39 @@ function getRadioValue(name) {
   return selected ? selected.value : '';
 }
 
-// --- LÓGICA DE VISIBILIDAD (CORREGIDA) ---
+// --- LÓGICA DE VISIBILIDAD (ACTUALIZADA V9) ---
 function updateVisibility() {
   // 1. Lógica de Canal (P2 -> P3)
   const canal = getRadioValue('canal');
+  
+  // Elementos del DOM
   const bloqueAmabilidad = document.getElementById('sub_p3_amabilidad');
   const bloqueAsesoria = document.getElementById('sub_p3_asesoria');
   const bloqueWeb = document.getElementById('sub_p3_web');
   const bloqueStock = document.getElementById('sub_p3_stock');
+  const bloqueSoporte = document.getElementById('sub_p3_soporte'); // Nueva pregunta
 
   if (canal === 'web') {
     // CASO WEB: 
-    // Ocultar preguntas humanas (Amabilidad, Asesoría)
+    // Mostrar: Navegación (3.3) y Soporte (3.5)
+    // Ocultar: Amabilidad (3.1), Asesoría (3.2) y Stock (3.4)
     if(bloqueAmabilidad) bloqueAmabilidad.classList.add('hidden');
     if(bloqueAsesoria) bloqueAsesoria.classList.add('hidden');
+    if(bloqueStock) bloqueStock.classList.add('hidden'); // Stock oculto en Web
     
-    // Mostrar Web y Mostrar Stock (Corrección aquí: Stock visible)
     if(bloqueWeb) bloqueWeb.classList.remove('hidden');
-    if(bloqueStock) bloqueStock.classList.remove('hidden'); 
+    if(bloqueSoporte) bloqueSoporte.classList.remove('hidden');
 
   } else if (canal === 'telefono' || canal === 'terreno') {
     // CASO HUMANO:
-    // Mostrar preguntas humanas
+    // Mostrar: Amabilidad (3.1), Asesoría (3.2) y Stock (3.4)
+    // Ocultar: Navegación (3.3) y Soporte (3.5)
     if(bloqueAmabilidad) bloqueAmabilidad.classList.remove('hidden');
     if(bloqueAsesoria) bloqueAsesoria.classList.remove('hidden');
+    if(bloqueStock) bloqueStock.classList.remove('hidden'); // Stock visible en humano
     
-    // Ocultar Web, pero Mostrar Stock
     if(bloqueWeb) bloqueWeb.classList.add('hidden');
-    if(bloqueStock) bloqueStock.classList.remove('hidden');
+    if(bloqueSoporte) bloqueSoporte.classList.add('hidden');
   }
   // Si no hay selección, se mantiene el estado inicial del HTML.
 
@@ -160,6 +165,7 @@ if (form) {
       p3_asesoria: getRadioValue('p3_2'),
       p3_web: getRadioValue('p3_3'),
       p3_stock: getRadioValue('p3_4'),
+      p3_soporte: getRadioValue('p3_5'), // NUEVO CAMPO
       
       // P4 Precios
       p4_precio_meds: getRadioValue('p4_1'),
@@ -211,8 +217,6 @@ if (form) {
 
 // Ejecutar al inicio para asegurar estado visual correcto
 updateVisibility();
-
-
 
 
 
