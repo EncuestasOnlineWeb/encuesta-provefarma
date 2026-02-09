@@ -1,5 +1,5 @@
-// URL de tu Web App (Google Apps Script)
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzQOXlezeiJqTw5XkCxpUvqmAarwNBshAQbCgYU-8SQqDlkIZf4qa74F_VodpUEhmitOQ/exec';
+// URL de tu Web App (ACTUALIZADA)
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbycDSUB3r8KMBfElQkHHAKvdI-1QpIDA-LN8YU2OveuhOi8GpH9WtQnv1VublkPqNICwA/exec';
 const ALLOWED_ORIGIN = 'https://encuestasonlineweb.github.io';
 
 const form = document.getElementById('encuestaForm');
@@ -217,6 +217,7 @@ if (form) {
 
 // Ejecutar al inicio para asegurar estado visual correcto
 updateVisibility();
+
 
 
 
