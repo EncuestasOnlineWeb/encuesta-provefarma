@@ -353,12 +353,11 @@
 
       <!-- PREGUNTA 3: ATRIBUTOS VENTA (Se ocultan/muestran según P2) -->
       <div class="field" id="bloque_venta">
-        <label>Pensando en el servicio de venta que recibió por ese canal, ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
+        <label>Pensando en el servicio de venta que recibió por ese canal, en una escala de 1 a 5 ¿cómo calificaría su nivel de satisfacción con los siguientes aspectos?</label>
         
         <!-- 3.1 Amabilidad (Solo Teléfono/Terreno) -->
         <div class="sub-pregunta" id="sub_p3_amabilidad">
             <span class="sub-label">Amabilidad del vendedor</span>
-            <!-- AQUI USAMOS GRID 5 PARA ALINEACIÓN PERFECTA -->
             <div class="scale-grid-5">
                 <input type="radio" name="p3_1" id="p3_1_1" value="1" class="scale-input"><label for="p3_1_1" class="scale-btn">1</label>
                 <input type="radio" name="p3_1" id="p3_1_2" value="2" class="scale-input"><label for="p3_1_2" class="scale-btn">2</label>
@@ -394,8 +393,8 @@
             </div>
             <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
-        
-        <!-- 3.4 Stock (Todos) -->
+
+        <!-- 3.4 Stock (AHORA SOLO PARA HUMANOS) -->
         <div class="sub-pregunta" id="sub_p3_stock">
             <span class="sub-label">Stock de los productos</span>
             <div class="scale-grid-5">
@@ -404,6 +403,19 @@
                 <input type="radio" name="p3_4" id="p3_4_3" value="3" class="scale-input"><label for="p3_4_3" class="scale-btn">3</label>
                 <input type="radio" name="p3_4" id="p3_4_4" value="4" class="scale-input"><label for="p3_4_4" class="scale-btn">4</label>
                 <input type="radio" name="p3_4" id="p3_4_5" value="5" class="scale-input"><label for="p3_4_5" class="scale-btn">5</label>
+            </div>
+            <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
+        </div>
+
+        <!-- 3.5 Soporte Web (NUEVA PREGUNTA SOLO WEB) -->
+        <div class="sub-pregunta hidden" id="sub_p3_soporte">
+            <span class="sub-label">Atención en soporte plataforma Web</span>
+            <div class="scale-grid-5">
+                <input type="radio" name="p3_5" id="p3_5_1" value="1" class="scale-input"><label for="p3_5_1" class="scale-btn">1</label>
+                <input type="radio" name="p3_5" id="p3_5_2" value="2" class="scale-input"><label for="p3_5_2" class="scale-btn">2</label>
+                <input type="radio" name="p3_5" id="p3_5_3" value="3" class="scale-input"><label for="p3_5_3" class="scale-btn">3</label>
+                <input type="radio" name="p3_5" id="p3_5_4" value="4" class="scale-input"><label for="p3_5_4" class="scale-btn">4</label>
+                <input type="radio" name="p3_5" id="p3_5_5" value="5" class="scale-input"><label for="p3_5_5" class="scale-btn">5</label>
             </div>
             <div class="scale-legend"><span>Nada satisfecho</span><span>Muy satisfecho</span></div>
         </div>
@@ -428,7 +440,7 @@
         
         <!-- 4.2 Precio Belleza -->
         <div class="sub-pregunta">
-            <span class="sub-label">Oferta de precios de los productos Belleza y Cuidado Personal</span>
+            <span class="sub-label">Oferta de precios de productos Belleza y Cuidado Personal</span>
             <div class="scale-grid-5">
                 <input type="radio" name="p4_2" id="p4_2_1" value="1" class="scale-input"><label for="p4_2_1" class="scale-btn">1</label>
                 <input type="radio" name="p4_2" id="p4_2_2" value="2" class="scale-input"><label for="p4_2_2" class="scale-btn">2</label>
@@ -543,6 +555,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
