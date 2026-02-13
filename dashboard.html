@@ -64,10 +64,10 @@
     }
 
     .topbar-brand img {
-      height: 40px; /* Ajustado para el logo real */
+      height: 40px;
       width: auto;
       object-fit: contain;
-      background: rgba(255, 255, 255, 0.9); /* Fondo blanco sutil para resaltar logo */
+      background: rgba(255, 255, 255, 0.9);
       padding: 4px;
       border-radius: 6px;
     }
@@ -113,9 +113,6 @@
     }
 
     .btn-action:hover { transform: translateY(-1px); }
-
-    .btn-csv { background: var(--accent); color: var(--text); }
-    .btn-csv:hover { background: #e5ad00; }
 
     .btn-refresh { background: rgba(255,255,255,0.15); color: #fff; }
     .btn-refresh:hover { background: rgba(255,255,255,0.25); }
@@ -248,7 +245,6 @@
 
     .chart-wrapper { position: relative; width: 100%; }
 
-    /* Estilos nuevos para leyenda del Canal */
     .canal-legend {
       margin-top: 20px;
       border-top: 1px solid #f0f2f5;
@@ -370,8 +366,6 @@
     .badge-passive { background: #fef3c7; color: #92400e; }
     .badge-detractor { background: #fee2e2; color: #991b1b; }
 
-    #csvInput { display: none; }
-
     @media (max-width: 768px) {
       .dashboard { padding: 16px 12px 40px; }
       .charts-grid { grid-template-columns: 1fr; }
@@ -386,7 +380,6 @@
   <nav class="topbar">
     <div class="topbar-inner">
       <div class="topbar-brand">
-        <!-- Logo Real Provefarma -->
         <img src="Provefarma_img1.png" alt="Provefarma" onerror="this.style.display='none'">
         <div>
           <h1>Dashboard de Satisfacción</h1>
@@ -452,10 +445,9 @@
       <div class="chart-card">
         <h3>Distribución por Canal</h3>
         <p class="chart-sub">Canal de compra del último pedido</p>
-        <div class="chart-wrapper" style="height:220px;"> <!-- Reduje altura para dar espacio a la leyenda -->
+        <div class="chart-wrapper" style="height:220px;">
           <canvas id="chartCanal"></canvas>
         </div>
-        <!-- Nueva Leyenda Detallada -->
         <div id="canalLegend" class="canal-legend"></div>
       </div>
 
@@ -491,6 +483,9 @@
               <th>NPS</th>
               <th>Tipo</th>
               <th>Canal</th>
+              <!-- Columnas Nuevas de Evaluación de Vendedor -->
+              <th>Amabilidad</th>
+              <th>Asesoría</th>
               <th style="min-width: 250px;">Razón NPS</th>
               <th>ISN</th>
               <th>Precio Meds</th>
@@ -501,7 +496,7 @@
             </tr>
           </thead>
           <tbody id="tableBody">
-            <tr><td colspan="13" style="text-align:center;padding:40px;color:#6b7a94;">Cargando datos...</td></tr>
+            <tr><td colspan="15" style="text-align:center;padding:40px;color:#6b7a94;">Cargando datos...</td></tr>
           </tbody>
         </table>
       </div>
@@ -510,7 +505,6 @@
   </div>
 
   <script>
-  // URL DE LA API DE GOOGLE SHEETS
   var SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzjy_OFmHa9zk4lE9SRexhzBWD5TVu_C3gDChm_ilKPtSUxncb0dDJ2cE99EHxjsKnTVQ/exec';
 
   var rawData = [];
@@ -610,7 +604,6 @@
     if (rawData.length === 0) return;
     var data = rawData; 
     
-    // KPIs
     var nps = calcNPS(data);
     var kpiNPS = document.getElementById('kpiNPS');
     kpiNPS.textContent = nps.score;
@@ -633,14 +626,12 @@
       document.getElementById('kpiCanalSub').textContent = topCanal[1] + ' de ' + data.length + ' (' + Math.round(topCanal[1] / data.length * 100) + '%)';
     }
 
-    // NPS Bar
     var bar = document.getElementById('npsBar');
     bar.innerHTML = '';
     if (nps.pDet > 0) { var d = document.createElement('div'); d.className = 'nps-seg-detractor'; d.style.width = nps.pDet + '%'; d.textContent = nps.pDet + '%'; bar.appendChild(d); }
     if (nps.pPas > 0) { var p = document.createElement('div'); p.className = 'nps-seg-passive'; p.style.width = nps.pPas + '%'; p.textContent = nps.pPas + '%'; bar.appendChild(p); }
     if (nps.pPro > 0) { var pr = document.createElement('div'); pr.className = 'nps-seg-promoter'; pr.style.width = nps.pPro + '%'; pr.textContent = nps.pPro + '%'; bar.appendChild(pr); }
 
-    // Chart NPS Dist
     var npsDist = [0,0,0,0,0,0,0,0,0,0,0];
     data.forEach(function(r) { if (r.nps !== null && r.nps >= 0 && r.nps <= 10) npsDist[r.nps]++; });
     renderChart('chartNPSdist', 'bar', {
@@ -648,7 +639,6 @@
       datasets: [{ data: npsDist, backgroundColor: npsDist.map(function(_, i) { return i <= 6 ? '#fee2e2' : i <= 8 ? '#fef3c7' : '#d1fae5'; }), borderRadius: 4 }]
     }, { plugins: { legend: { display: false } } });
 
-    // Chart Canal & Custom Legend
     var canalOrder = ['web', 'telefono', 'terreno'];
     var canalLabelsPretty = { web: 'Web', telefono: 'Teléfono', terreno: 'Terreno' };
     var canalColors = ['#1f57a8', '#f4bb00', '#8b5cf6'];
@@ -657,9 +647,8 @@
     renderChart('chartCanal', 'doughnut', {
       labels: ['Web', 'Teléfono', 'Terreno'],
       datasets: [{ data: canalData, backgroundColor: canalColors, borderWidth: 2 }]
-    }, { cutout: '65%', plugins: { legend: { display: false } } }); // Ocultamos leyenda default
+    }, { cutout: '65%', plugins: { legend: { display: false } } });
 
-    // Generar Leyenda HTML Personalizada
     var legendHtml = '';
     canalOrder.forEach(function(c, i) {
       var count = canalCounts[c] || 0;
@@ -677,8 +666,6 @@
     });
     document.getElementById('canalLegend').innerHTML = legendHtml;
 
-
-    // Chart Dimensions
     var dimensions = [
       { key: 'amabilidad', label: 'Amabilidad' }, { key: 'asesoria', label: 'Asesoría' },
       { key: 'nav_web', label: 'Web UX' }, { key: 'stock', label: 'Stock' },
@@ -698,7 +685,6 @@
       datasets: [{ data: dimValues, backgroundColor: dimColors, borderRadius: 6 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 5 } } });
 
-    // Chart Motivos
     var motivoFiltered = data.filter(function(r) { return r.motivo_precio && r.motivo_precio.length > 0; });
     var motivoCounts = countBy(motivoFiltered, 'motivo_precio');
     var mLabels = Object.keys(motivoCounts);
@@ -721,12 +707,11 @@
 
   function renderTable(data) {
     var tbody = document.getElementById('tableBody');
-    document.getElementById('tableCount').textContent = data.length + ' registros recientes';
+    document.getElementById('tableCount').textContent = data.length + ' registros totales';
     var html = '';
-    // Mostramos solo los ultimos 50
     var reversedData = [...data].reverse(); 
     
-    reversedData.slice(0, 50).forEach(function(r, i) {
+    reversedData.slice(0, 100).forEach(function(r, i) {
       var npsClass = r.nps >= 9 ? 'badge-promoter' : r.nps >= 7 ? 'badge-passive' : 'badge-detractor';
       var originalIndex = data.length - i;
       
@@ -737,18 +722,20 @@
         '<td><strong>' + r.nps + '</strong></td>' +
         '<td><span class="badge ' + npsClass + '">' + (r.nps >= 9 ? 'Promotor' : r.nps >= 7 ? 'Pasivo' : 'Detractor') + '</span></td>' +
         '<td>' + escapeHtml(r.canal) + '</td>' +
+        // Nuevos datos de Amabilidad y Asesoría
+        '<td>' + (r.amabilidad !== null ? r.amabilidad : '—') + '</td>' +
+        '<td>' + (r.asesoria !== null ? r.asesoria : '—') + '</td>' +
         '<td title="' + escapeHtml(r.nps_razon) + '">' + escapeHtml(r.nps_razon) + '</td>' +
-        '<td>' + (r.isn||'-') + '</td>' +
-        '<td>' + (r.precio_meds||'-') + '</td>' +
-        '<td>' + (r.precio_belleza||'-') + '</td>' +
-        '<td>' + (r.tiempo_entrega||'-') + '</td>' +
-        '<td>' + (r.exactitud||'-') + '</td>' +
-        '<td>' + (r.estado||'-') + '</td></tr>';
+        '<td>' + (r.isn||'—') + '</td>' +
+        '<td>' + (r.precio_meds||'—') + '</td>' +
+        '<td>' + (r.precio_belleza||'—') + '</td>' +
+        '<td>' + (r.tiempo_entrega||'—') + '</td>' +
+        '<td>' + (r.exactitud||'—') + '</td>' +
+        '<td>' + (r.estado||'—') + '</td></tr>';
     });
     tbody.innerHTML = html;
   }
 
-  // Inicializar
   fetchFromSheets();
   </script>
 </body>
