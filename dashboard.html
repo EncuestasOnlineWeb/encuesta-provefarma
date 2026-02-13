@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard – Encuesta Provefarma</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1f57a8;
+      --primary-dark: #15417d;
+      --primary-light: #e8f0fe;
+      --accent: #f4bb00;
+      --accent-light: #fff9c4;
+      --bg: #f1f4f9;
+      --card: #ffffff;
+      --text: #1a2b4a;
+      --muted: #6b7a94;
+      --border: #dfe4ed;
+      --success: #0b8a5e;
+      --warning: #e67e22;
+      --danger: #cc1f1a;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(31,87,168,0.3);
+    }
+
+    .topbar-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-brand img {
+      height: 40px; /* Ajustado para el logo real */
+      width: auto;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.9); /* Fondo blanco sutil para resaltar logo */
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .topbar-brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-brand span {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      font-weight: 400;
+      display: block;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-badge {
+      background: rgba(255,255,255,0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-action {
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover { transform: translateY(-1px); }
+
+    .btn-csv { background: var(--accent); color: var(--text); }
+    .btn-csv:hover { background: #e5ad00; }
+
+    .btn-refresh { background: rgba(255,255,255,0.15); color: #fff; }
+    .btn-refresh:hover { background: rgba(255,255,255,0.25); }
+
+    .dashboard {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 28px 60px;
+    }
+
+    .status-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .status-dot.live { background: var(--success); animation: pulse 2s infinite; }
+    .status-dot.offline { background: var(--muted); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .kpi-card.nps::before { background: var(--primary); }
+    .kpi-card.isn::before { background: var(--accent); }
+    .kpi-card.resp::before { background: var(--success); }
+    .kpi-card.canal::before { background: #8b5cf6; }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .kpi-value.positive { color: var(--success); }
+    .kpi-value.neutral { color: var(--warning); }
+    .kpi-value.negative { color: var(--danger); }
+
+    .kpi-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-card.full { grid-column: 1 / -1; }
+
+    .chart-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .chart-card .chart-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .chart-wrapper { position: relative; width: 100%; }
+
+    /* Estilos nuevos para leyenda del Canal */
+    .canal-legend {
+      margin-top: 20px;
+      border-top: 1px solid #f0f2f5;
+      padding-top: 15px;
+    }
+    .canal-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .canal-info { display: flex; align-items: center; gap: 8px; }
+    .canal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .canal-count { font-weight: 700; color: var(--text); }
+    .canal-pct { color: var(--muted); font-size: 0.8rem; margin-left: 4px;}
+
+    .nps-bar-container { margin-top: 12px; }
+
+    .nps-stacked-bar {
+      display: flex;
+      height: 36px;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .nps-stacked-bar > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: width 0.6s ease;
+    }
+
+    .nps-seg-detractor { background: var(--danger); }
+    .nps-seg-passive { background: var(--warning); }
+    .nps-seg-promoter { background: var(--success); }
+
+    .nps-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .nps-legend span::before {
+      content: '';
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .nps-legend .leg-det::before { background: var(--danger); }
+    .nps-legend .leg-pas::before { background: var(--warning); }
+    .nps-legend .leg-pro::before { background: var(--success); }
+
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-header h3 { font-size: 0.95rem; font-weight: 700; }
+
+    .table-scroll { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+
+    thead th {
+      background: var(--bg);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f2f5;
+      white-space: normal;
+      vertical-align: top;
+    }
+
+    tbody tr:hover { background: #f8fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .badge-promoter { background: #d1fae5; color: #065f46; }
+    .badge-passive { background: #fef3c7; color: #92400e; }
+    .badge-detractor { background: #fee2e2; color: #991b1b; }
+
+    #csvInput { display: none; }
+
+    @media (max-width: 768px) {
+      .dashboard { padding: 16px 12px 40px; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .topbar-inner { padding: 12px 16px; }
+      .kpi-value { font-size: 1.7rem; }
+      .chart-card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <!-- Logo Real Provefarma -->
+        <img src="Provefarma_img1.png" alt="Provefarma" onerror="this.style.display='none'">
+        <div>
+          <h1>Dashboard de Satisfacción</h1>
+          <span>Encuesta Provefarma Distribución</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="topbar-badge" id="badgeConexion">
+          <span class="status-dot offline"></span> Sin datos
+        </div>
+        <button class="btn-action btn-refresh" onclick="fetchFromSheets()">↻ Recargar Datos</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+
+    <div class="status-bar">
+      <span id="statusText">Iniciando sistema...</span>
+      <span id="statusCount" style="font-weight:600;"></span>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card nps">
+        <div class="kpi-label">NPS Score</div>
+        <div class="kpi-value" id="kpiNPS">—</div>
+        <div class="kpi-sub" id="kpiNPSsub">Sin datos</div>
+      </div>
+      <div class="kpi-card isn">
+        <div class="kpi-label">ISN Promedio</div>
+        <div class="kpi-value" id="kpiISN">—</div>
+        <div class="kpi-sub" id="kpiISNsub">Satisfacción general</div>
+      </div>
+      <div class="kpi-card resp">
+        <div class="kpi-label">Respuestas</div>
+        <div class="kpi-value" id="kpiResp">0</div>
+        <div class="kpi-sub" id="kpiRespSub">Total registros</div>
+      </div>
+      <div class="kpi-card canal">
+        <div class="kpi-label">Canal Principal</div>
+        <div class="kpi-value" id="kpiCanal" style="font-size:1.5rem;">—</div>
+        <div class="kpi-sub" id="kpiCanalSub"></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Distribución NPS</h3>
+        <p class="chart-sub">Detractores · Pasivos · Promotores</p>
+        <div class="nps-bar-container">
+          <div class="nps-stacked-bar" id="npsBar"></div>
+          <div class="nps-legend">
+            <span class="leg-det">Detractores (0-6)</span>
+            <span class="leg-pas">Pasivos (7-8)</span>
+            <span class="leg-pro">Promotores (9-10)</span>
+          </div>
+        </div>
+        <div class="chart-wrapper" style="margin-top:16px; height:220px;">
+          <canvas id="chartNPSdist"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Distribución por Canal</h3>
+        <p class="chart-sub">Canal de compra del último pedido</p>
+        <div class="chart-wrapper" style="height:220px;"> <!-- Reduje altura para dar espacio a la leyenda -->
+          <canvas id="chartCanal"></canvas>
+        </div>
+        <!-- Nueva Leyenda Detallada -->
+        <div id="canalLegend" class="canal-legend"></div>
+      </div>
+
+      <div class="chart-card full">
+        <h3>Satisfacción por Dimensión</h3>
+        <p class="chart-sub">Promedio de cada atributo evaluado (escala 1-5)</p>
+        <div class="chart-wrapper" style="height:300px;">
+          <canvas id="chartDimensions"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Motivos de Insatisfacción (Precios)</h3>
+        <p class="chart-sub">Solo respuestas con nota 1 o 2 en precios</p>
+        <div class="chart-wrapper" style="height:260px;">
+          <canvas id="chartMotivos"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Detalle de Respuestas Recientes</h3>
+        <span id="tableCount" style="font-size:0.82rem; color:var(--muted);"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Fecha</th>
+              <th>RUT</th>
+              <th>NPS</th>
+              <th>Tipo</th>
+              <th>Canal</th>
+              <th style="min-width: 250px;">Razón NPS</th>
+              <th>ISN</th>
+              <th>Precio Meds</th>
+              <th>Precio Belleza</th>
+              <th>T. Entrega</th>
+              <th>Exactitud</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="13" style="text-align:center;padding:40px;color:#6b7a94;">Cargando datos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  // URL DE LA API DE GOOGLE SHEETS
+  var SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzjy_OFmHa9zk4lE9SRexhzBWD5TVu_C3gDChm_ilKPtSUxncb0dDJ2cE99EHxjsKnTVQ/exec';
+
+  var rawData = [];
+  var charts = {};
+
+  function parseNum(v) {
+    if (v === '' || v === undefined || v === null) return null;
+    var n = Number(v);
+    return isNaN(n) ? null : n;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatFecha(f) {
+    if (!f) return '—';
+    var d = new Date(f);
+    if (isNaN(d.getTime())) return String(f);
+    return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+  }
+
+  function parseRows(rows) {
+    return rows.map(function(r) {
+      return {
+        fecha: r[0], rut: String(r[1]), rut_fmt: String(r[2]),
+        nps: parseNum(r[3]), nps_razon: String(r[4]||''),
+        canal: String(r[5]||'').toLowerCase().trim(),
+        amabilidad: parseNum(r[6]), asesoria: parseNum(r[7]),
+        nav_web: parseNum(r[8]), stock: parseNum(r[9]), soporte_web: parseNum(r[10]),
+        precio_meds: parseNum(r[11]), precio_belleza: parseNum(r[12]),
+        motivo_precio: String(r[13]||''), motivo_otro: String(r[14]||''),
+        tiempo_entrega: parseNum(r[15]), exactitud: parseNum(r[16]),
+        estado: parseNum(r[17]), isn: parseNum(r[18])
+      };
+    }).filter(function(r) { return r.nps !== null; });
+  }
+
+  function fetchFromSheets() {
+    updateStatus('Conectando con Google Sheets...', 'loading');
+    fetch(SHEETS_API_URL)
+      .then(function(res) { 
+        if (!res.ok) throw new Error('HTTP ' + res.status); 
+        return res.json(); 
+      })
+      .then(function(json) {
+        var rows = (json.data && Array.isArray(json.data)) ? json.data : Array.isArray(json) ? json : null;
+        if (!rows) throw new Error('Formato no reconocido');
+        rawData = parseRows(rows);
+        renderDashboard();
+        updateStatus('Conectado a Google Sheets', 'live', rawData.length);
+      })
+      .catch(function(err) {
+        console.error('Error:', err);
+        updateStatus('Error al conectar: ' + err.message, 'error');
+      });
+  }
+
+  function updateStatus(msg, type, count) {
+    document.getElementById('statusText').textContent = msg;
+    document.getElementById('statusCount').textContent = count ? count + ' registros' : '';
+    var badge = document.getElementById('badgeConexion');
+    if (type === 'live') badge.innerHTML = '<span class="status-dot live"></span> En vivo';
+    else badge.innerHTML = '<span class="status-dot offline"></span> Sin conexión';
+  }
+
+  function calcNPS(data) {
+    var valid = data.filter(function(r) { return r.nps !== null; });
+    if (valid.length === 0) return { score: 0, promoters: 0, passives: 0, detractors: 0, pPro: 0, pPas: 0, pDet: 0 };
+    var det = valid.filter(function(r) { return r.nps <= 6; }).length;
+    var pas = valid.filter(function(r) { return r.nps >= 7 && r.nps <= 8; }).length;
+    var pro = valid.filter(function(r) { return r.nps >= 9; }).length;
+    var n = valid.length;
+    return { 
+      score: Math.round(((pro - det) / n) * 100), 
+      promoters: pro, passives: pas, detractors: det,
+      pPro: Math.round((pro / n) * 100), pPas: Math.round((pas / n) * 100), pDet: Math.round((det / n) * 100) 
+    };
+  }
+
+  function avg(data, field) {
+    var valid = data.filter(function(r) { return r[field] !== null; });
+    if (valid.length === 0) return null;
+    var sum = 0; valid.forEach(function(r) { sum += r[field]; }); return sum / valid.length;
+  }
+
+  function countBy(data, field) {
+    var counts = {};
+    data.forEach(function(r) { var val = r[field] || 'Sin respuesta'; counts[val] = (counts[val] || 0) + 1; });
+    return counts;
+  }
+
+  function renderDashboard() {
+    if (rawData.length === 0) return;
+    var data = rawData; 
+    
+    // KPIs
+    var nps = calcNPS(data);
+    var kpiNPS = document.getElementById('kpiNPS');
+    kpiNPS.textContent = nps.score;
+    kpiNPS.className = 'kpi-value ' + (nps.score >= 50 ? 'positive' : nps.score >= 0 ? 'neutral' : 'negative');
+    document.getElementById('kpiNPSsub').textContent = nps.promoters + ' promotores · ' + nps.passives + ' pasivos · ' + nps.detractors + ' detractores';
+
+    var isnAvg = avg(data, 'isn');
+    var kpiISN = document.getElementById('kpiISN');
+    kpiISN.textContent = isnAvg !== null ? isnAvg.toFixed(1) : '—';
+    kpiISN.className = 'kpi-value ' + (isnAvg >= 4 ? 'positive' : isnAvg >= 3 ? 'neutral' : 'negative');
+
+    document.getElementById('kpiResp').textContent = data.length;
+
+    var canalCounts = countBy(data, 'canal');
+    var canalEntries = Object.keys(canalCounts).map(function(k) { return [k, canalCounts[k]]; });
+    canalEntries.sort(function(a, b) { return b[1] - a[1]; });
+    var topCanal = canalEntries[0];
+    if (topCanal) {
+      document.getElementById('kpiCanal').textContent = topCanal[0].charAt(0).toUpperCase() + topCanal[0].slice(1);
+      document.getElementById('kpiCanalSub').textContent = topCanal[1] + ' de ' + data.length + ' (' + Math.round(topCanal[1] / data.length * 100) + '%)';
+    }
+
+    // NPS Bar
+    var bar = document.getElementById('npsBar');
+    bar.innerHTML = '';
+    if (nps.pDet > 0) { var d = document.createElement('div'); d.className = 'nps-seg-detractor'; d.style.width = nps.pDet + '%'; d.textContent = nps.pDet + '%'; bar.appendChild(d); }
+    if (nps.pPas > 0) { var p = document.createElement('div'); p.className = 'nps-seg-passive'; p.style.width = nps.pPas + '%'; p.textContent = nps.pPas + '%'; bar.appendChild(p); }
+    if (nps.pPro > 0) { var pr = document.createElement('div'); pr.className = 'nps-seg-promoter'; pr.style.width = nps.pPro + '%'; pr.textContent = nps.pPro + '%'; bar.appendChild(pr); }
+
+    // Chart NPS Dist
+    var npsDist = [0,0,0,0,0,0,0,0,0,0,0];
+    data.forEach(function(r) { if (r.nps !== null && r.nps >= 0 && r.nps <= 10) npsDist[r.nps]++; });
+    renderChart('chartNPSdist', 'bar', {
+      labels: ['0','1','2','3','4','5','6','7','8','9','10'],
+      datasets: [{ data: npsDist, backgroundColor: npsDist.map(function(_, i) { return i <= 6 ? '#fee2e2' : i <= 8 ? '#fef3c7' : '#d1fae5'; }), borderRadius: 4 }]
+    }, { plugins: { legend: { display: false } } });
+
+    // Chart Canal & Custom Legend
+    var canalOrder = ['web', 'telefono', 'terreno'];
+    var canalLabelsPretty = { web: 'Web', telefono: 'Teléfono', terreno: 'Terreno' };
+    var canalColors = ['#1f57a8', '#f4bb00', '#8b5cf6'];
+    var canalData = canalOrder.map(function(c) { return canalCounts[c] || 0; });
+    
+    renderChart('chartCanal', 'doughnut', {
+      labels: ['Web', 'Teléfono', 'Terreno'],
+      datasets: [{ data: canalData, backgroundColor: canalColors, borderWidth: 2 }]
+    }, { cutout: '65%', plugins: { legend: { display: false } } }); // Ocultamos leyenda default
+
+    // Generar Leyenda HTML Personalizada
+    var legendHtml = '';
+    canalOrder.forEach(function(c, i) {
+      var count = canalCounts[c] || 0;
+      var pct = data.length > 0 ? Math.round((count / data.length) * 100) : 0;
+      legendHtml += '<div class="canal-item">' +
+        '<div class="canal-info">' +
+          '<div class="canal-dot" style="background:' + canalColors[i] + '"></div>' +
+          '<span>' + canalLabelsPretty[c] + '</span>' +
+        '</div>' +
+        '<div>' +
+          '<span class="canal-count">' + count + '</span>' +
+          '<span class="canal-pct">(' + pct + '%)</span>' +
+        '</div>' +
+      '</div>';
+    });
+    document.getElementById('canalLegend').innerHTML = legendHtml;
+
+
+    // Chart Dimensions
+    var dimensions = [
+      { key: 'amabilidad', label: 'Amabilidad' }, { key: 'asesoria', label: 'Asesoría' },
+      { key: 'nav_web', label: 'Web UX' }, { key: 'stock', label: 'Stock' },
+      { key: 'precio_meds', label: 'Precio Meds' }, { key: 'precio_belleza', label: 'Precio Belleza' }
+    ];
+    var dimLabels = [], dimValues = [], dimColors = [];
+    dimensions.forEach(function(dim) {
+      var v = avg(data, dim.key);
+      if (v !== null) { 
+        dimLabels.push(dim.label); 
+        dimValues.push(v); 
+        dimColors.push(v >= 4 ? '#0b8a5e' : v >= 3 ? '#e67e22' : '#cc1f1a'); 
+      }
+    });
+    renderChart('chartDimensions', 'bar', {
+      labels: dimLabels,
+      datasets: [{ data: dimValues, backgroundColor: dimColors, borderRadius: 6 }]
+    }, { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 5 } } });
+
+    // Chart Motivos
+    var motivoFiltered = data.filter(function(r) { return r.motivo_precio && r.motivo_precio.length > 0; });
+    var motivoCounts = countBy(motivoFiltered, 'motivo_precio');
+    var mLabels = Object.keys(motivoCounts);
+    renderChart('chartMotivos', 'bar', {
+      labels: mLabels.map(function(l) { return l.length > 15 ? l.slice(0, 15) + '...' : l; }),
+      datasets: [{ data: mLabels.map(function(k) { return motivoCounts[k]; }), backgroundColor: '#cc1f1a', borderRadius: 4 }]
+    }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+
+    renderTable(data);
+  }
+
+  function renderChart(canvasId, type, chartData, options) {
+    var ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    if (charts[canvasId]) charts[canvasId].destroy();
+    var baseOpts = { responsive: true, maintainAspectRatio: false };
+    for (var key in options) baseOpts[key] = options[key];
+    charts[canvasId] = new Chart(ctx, { type: type, data: chartData, options: baseOpts });
+  }
+
+  function renderTable(data) {
+    var tbody = document.getElementById('tableBody');
+    document.getElementById('tableCount').textContent = data.length + ' registros recientes';
+    var html = '';
+    // Mostramos solo los ultimos 50
+    var reversedData = [...data].reverse(); 
+    
+    reversedData.slice(0, 50).forEach(function(r, i) {
+      var npsClass = r.nps >= 9 ? 'badge-promoter' : r.nps >= 7 ? 'badge-passive' : 'badge-detractor';
+      var originalIndex = data.length - i;
+      
+      html += '<tr>' +
+        '<td style="color:var(--muted); font-size:0.75rem;">' + originalIndex + '</td>' +
+        '<td>' + formatFecha(r.fecha) + '</td>' +
+        '<td style="font-family:\'JetBrains Mono\'">' + escapeHtml(r.rut_fmt) + '</td>' +
+        '<td><strong>' + r.nps + '</strong></td>' +
+        '<td><span class="badge ' + npsClass + '">' + (r.nps >= 9 ? 'Promotor' : r.nps >= 7 ? 'Pasivo' : 'Detractor') + '</span></td>' +
+        '<td>' + escapeHtml(r.canal) + '</td>' +
+        '<td title="' + escapeHtml(r.nps_razon) + '">' + escapeHtml(r.nps_razon) + '</td>' +
+        '<td>' + (r.isn||'-') + '</td>' +
+        '<td>' + (r.precio_meds||'-') + '</td>' +
+        '<td>' + (r.precio_belleza||'-') + '</td>' +
+        '<td>' + (r.tiempo_entrega||'-') + '</td>' +
+        '<td>' + (r.exactitud||'-') + '</td>' +
+        '<td>' + (r.estado||'-') + '</td></tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  // Inicializar
+  fetchFromSheets();
+  </script>
+</body>
+</html>
