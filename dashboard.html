@@ -465,6 +465,15 @@
         </div>
       </div>
 
+      <!-- NUEVO GRÁFICO COMPARATIVO VENDEDORES -->
+      <div class="chart-card">
+        <h3>Evaluación Vendedores</h3>
+        <p class="chart-sub">Call Center vs. Terreno (Amabilidad y Asesoría)</p>
+        <div class="chart-wrapper" style="height:260px;">
+          <canvas id="chartVendedores"></canvas>
+        </div>
+      </div>
+
       <div class="chart-card">
         <h3>Motivos de Insatisfacción (Precios)</h3>
         <p class="chart-sub">Solo respuestas con nota 1 o 2 en precios</p>
@@ -488,7 +497,7 @@
               <th>RUT</th>
               <th>Cliente / Promedio (3m)</th>
               <th>NPS</th>
-              <th>Tipo</th> <!-- AQUÍ ESTÁ EL CAMBIO IMPORTANTE: AGREGUÉ EL TITULO FALTANTE -->
+              <th>Tipo</th>
               <th>Canal</th>
               <th>Amab</th> 
               <th>Ases</th> 
@@ -752,6 +761,37 @@
       datasets: [{ data: dimValues, backgroundColor: dimColors, borderRadius: 6 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 5 } } });
 
+    // --- GRÁFICO COMPARATIVO VENDEDORES (NUEVO) ---
+    var phoneData = data.filter(function(r) { return r.canal === 'telefono'; });
+    var fieldData = data.filter(function(r) { return r.canal === 'terreno'; });
+
+    var avgPhoneAmab = avg(phoneData, 'amabilidad') || 0;
+    var avgPhoneAses = avg(phoneData, 'asesoria') || 0;
+    var avgFieldAmab = avg(fieldData, 'amabilidad') || 0;
+    var avgFieldAses = avg(fieldData, 'asesoria') || 0;
+
+    renderChart('chartVendedores', 'bar', {
+      labels: ['Amabilidad', 'Asesoría'],
+      datasets: [
+        {
+          label: 'Call Center',
+          data: [avgPhoneAmab, avgPhoneAses],
+          backgroundColor: '#f4bb00', // Amarillo
+          borderRadius: 4
+        },
+        {
+          label: 'Terreno',
+          data: [avgFieldAmab, avgFieldAses],
+          backgroundColor: '#8b5cf6', // Morado
+          borderRadius: 4
+        }
+      ]
+    }, {
+      scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } } }
+    });
+    // ---------------------------------------------
+
     var motivoFiltered = data.filter(function(r) { return r.motivo_precio && r.motivo_precio.length > 0; });
     var motivoCounts = countBy(motivoFiltered, 'motivo_precio');
     var mLabels = Object.keys(motivoCounts);
@@ -823,6 +863,7 @@
   </script>
 </body>
 </html>
+
 
 
 
