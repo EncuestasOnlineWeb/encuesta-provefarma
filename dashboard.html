@@ -306,6 +306,14 @@
     .nps-legend .leg-pas::before { background: var(--warning); }
     .nps-legend .leg-pro::before { background: var(--success); }
 
+    /* --- ESTILO PARA TABLA CRÍTICA --- */
+    .critical-card {
+        background: #fffafa; /* Fondo rojizo muy suave */
+        border-left: 5px solid var(--danger);
+    }
+    
+    .critical-card h3 { color: var(--danger); }
+
     .table-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -367,6 +375,8 @@
     .badge-promoter { background: #d1fae5; color: #065f46; }
     .badge-passive { background: #fef3c7; color: #92400e; }
     .badge-detractor { background: #fee2e2; color: #991b1b; }
+    
+    .badge-crit { background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 4px; display:inline-block; margin-bottom: 2px;}
 
     .client-info { display: flex; flex-direction: column; }
     .client-name { font-weight: 700; color: var(--primary); margin-bottom: 2px; }
@@ -465,7 +475,15 @@
         </div>
       </div>
 
-      <!-- NUEVO GRÁFICO COMPARATIVO VENDEDORES -->
+      <!-- NUEVO: GRÁFICO DISTRIBUCIÓN DESPACHO -->
+      <div class="chart-card full">
+        <h3>Evaluación Detallada de Logística</h3>
+        <p class="chart-sub">Distribución de notas (1 a 5) en los 3 pilares del despacho</p>
+        <div class="chart-wrapper" style="height:300px;">
+          <canvas id="chartDeliveryDist"></canvas>
+        </div>
+      </div>
+
       <div class="chart-card">
         <h3>Evaluación Vendedores</h3>
         <p class="chart-sub">Call Center vs. Terreno (Amabilidad y Asesoría)</p>
@@ -481,6 +499,29 @@
           <canvas id="chartMotivos"></canvas>
         </div>
       </div>
+    </div>
+
+    <!-- NUEVO: TABLA DE ALERTAS CRÍTICAS -->
+    <div class="table-card critical-card" style="margin-bottom: 24px;">
+        <div class="table-header">
+          <h3>🚨 Alertas de Insatisfacción (Notas 1 y 2)</h3>
+          <span style="font-size:0.8rem; color:var(--muted);">Foco en problemas críticos</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Canal</th>
+                <th>Alertas Detectadas</th>
+              </tr>
+            </thead>
+            <tbody id="criticalTableBody">
+              <tr><td colspan="4" style="text-align:center;padding:20px;color:#6b7a94;">Sin alertas críticas</td></tr>
+            </tbody>
+          </table>
+        </div>
     </div>
 
     <div class="table-card">
@@ -522,13 +563,12 @@
   <script>
   // CONFIGURACIÓN
   var SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzjy_OFmHa9zk4lE9SRexhzBWD5TVu_C3gDChm_ilKPtSUxncb0dDJ2cE99EHxjsKnTVQ/exec';
-  var CSV_URL = 'clientes paragithub.csv'; // Nombre exacto del archivo subido
+  var CSV_URL = 'clientes paragithub.csv'; 
 
   var rawData = [];
-  var clientsMap = {}; // Mapa RUT -> Datos
+  var clientsMap = {}; 
   var charts = {};
 
-  // Formateo de Dinero (Peso Chileno)
   const moneyFormatter = new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP',
@@ -575,56 +615,42 @@
     }).filter(function(r) { return r.nps !== null; });
   }
 
-  // --- Lógica para cargar CSV de Clientes ---
   function parseClientsCSV(text) {
     var lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length < 2) return; // Sin datos
+    if (lines.length < 2) return; 
     
-    // Detectar separador (Tab o Punto y Coma o Coma)
     var firstLine = lines[0];
     var sep = ',';
     if (firstLine.indexOf('\t') !== -1) sep = '\t';
     else if (firstLine.indexOf(';') !== -1) sep = ';';
 
-    // Parsear líneas (Saltando encabezado)
     for (var i = 1; i < lines.length; i++) {
       var parts = lines[i].split(sep);
-      // Estructura esperada: RUT (col 0), Razón Social (col 1), Promedio (col 2)
       if (parts.length >= 2) {
         var rutRaw = parts[0].replace(/['"]/g, '').trim(); 
-        var clean = cleanRut(rutRaw); // Guardamos el RUT limpio (solo números, sin DV porque así viene en tu CSV)
-        
+        var clean = cleanRut(rutRaw); 
         var nombre = parts[1].replace(/['"]/g, '').trim();
         var monto = parts.length > 2 ? parts[2].replace(/['"]/g, '').trim() : '0';
-        
-        clientsMap[clean] = {
-          nombre: nombre,
-          monto: parseInt(monto) || 0
-        };
+        clientsMap[clean] = { nombre: nombre, monto: parseInt(monto) || 0 };
       }
     }
-    console.log("Clientes cargados:", Object.keys(clientsMap).length);
   }
 
   async function initDashboard() {
     updateStatus('Conectando...', 'loading');
-    
     try {
-      // Cargar CSV y Google Sheets en paralelo
       const [csvRes, sheetsRes] = await Promise.allSettled([
         fetch(CSV_URL),
         fetch(SHEETS_API_URL)
       ]);
 
-      // Procesar CSV de Clientes
       if (csvRes.status === 'fulfilled' && csvRes.value.ok) {
         const text = await csvRes.value.text();
         parseClientsCSV(text);
       } else {
-        console.warn("No se pudo cargar el archivo de clientes: " + CSV_URL);
+        console.warn("No se pudo cargar clientes csv.");
       }
 
-      // Procesar Google Sheets
       if (sheetsRes.status === 'fulfilled' && sheetsRes.value.ok) {
         const json = await sheetsRes.value.json();
         var rows = (json.data && Array.isArray(json.data)) ? json.data : Array.isArray(json) ? json : null;
@@ -635,7 +661,6 @@
       } else {
         throw new Error('Error conectando a Google Sheets');
       }
-
     } catch (err) {
       console.error(err);
       updateStatus('Error: ' + err.message, 'error');
@@ -680,6 +705,7 @@
     if (rawData.length === 0) return;
     var data = rawData; 
     
+    // --- 1. RENDERING KPIS (Igual que antes) ---
     var nps = calcNPS(data);
     var kpiNPS = document.getElementById('kpiNPS');
     kpiNPS.textContent = nps.score;
@@ -708,6 +734,7 @@
     if (nps.pPas > 0) { var p = document.createElement('div'); p.className = 'nps-seg-passive'; p.style.width = nps.pPas + '%'; p.textContent = nps.pPas + '%'; bar.appendChild(p); }
     if (nps.pPro > 0) { var pr = document.createElement('div'); pr.className = 'nps-seg-promoter'; pr.style.width = nps.pPro + '%'; pr.textContent = nps.pPro + '%'; bar.appendChild(pr); }
 
+    // --- 2. RENDERING CHARTS ---
     var npsDist = [0,0,0,0,0,0,0,0,0,0,0];
     data.forEach(function(r) { if (r.nps !== null && r.nps >= 0 && r.nps <= 10) npsDist[r.nps]++; });
     renderChart('chartNPSdist', 'bar', {
@@ -719,29 +746,21 @@
     var canalLabelsPretty = { web: 'Web', telefono: 'Teléfono', terreno: 'Terreno' };
     var canalColors = ['#1f57a8', '#f4bb00', '#8b5cf6'];
     var canalData = canalOrder.map(function(c) { return canalCounts[c] || 0; });
-    
     renderChart('chartCanal', 'doughnut', {
       labels: ['Web', 'Teléfono', 'Terreno'],
       datasets: [{ data: canalData, backgroundColor: canalColors, borderWidth: 2 }]
     }, { cutout: '65%', plugins: { legend: { display: false } } });
 
+    // Leyenda Manual Canal
     var legendHtml = '';
     canalOrder.forEach(function(c, i) {
       var count = canalCounts[c] || 0;
       var pct = data.length > 0 ? Math.round((count / data.length) * 100) : 0;
-      legendHtml += '<div class="canal-item">' +
-        '<div class="canal-info">' +
-          '<div class="canal-dot" style="background:' + canalColors[i] + '"></div>' +
-          '<span>' + canalLabelsPretty[c] + '</span>' +
-        '</div>' +
-        '<div>' +
-          '<span class="canal-count">' + count + '</span>' +
-          '<span class="canal-pct">(' + pct + '%)</span>' +
-        '</div>' +
-      '</div>';
+      legendHtml += '<div class="canal-item"><div class="canal-info"><div class="canal-dot" style="background:' + canalColors[i] + '"></div><span>' + canalLabelsPretty[c] + '</span></div><div><span class="canal-count">' + count + '</span><span class="canal-pct">(' + pct + '%)</span></div></div>';
     });
     document.getElementById('canalLegend').innerHTML = legendHtml;
 
+    // Chart Dimensions (Overview)
     var dimensions = [
       { key: 'amabilidad', label: 'Amabilidad' }, { key: 'asesoria', label: 'Asesoría' },
       { key: 'nav_web', label: 'Web UX' }, { key: 'stock', label: 'Stock' },
@@ -761,37 +780,45 @@
       datasets: [{ data: dimValues, backgroundColor: dimColors, borderRadius: 6 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 5 } } });
 
-    // --- GRÁFICO COMPARATIVO VENDEDORES (NUEVO) ---
+    // NUEVO: Chart Delivery Distribution (Stacked)
+    // Calculamos frecuencias 1-5 para cada dimensión de despacho
+    var dDims = ['tiempo_entrega', 'exactitud', 'estado'];
+    var dLabels = ['Tiempo Entrega', 'Exactitud Pedido', 'Estado Productos'];
+    var dCounts = { 1: [0,0,0], 2: [0,0,0], 3: [0,0,0], 4: [0,0,0], 5: [0,0,0] };
+
+    data.forEach(function(r) {
+        dDims.forEach(function(key, idx) {
+            var val = r[key];
+            if (val >= 1 && val <= 5) dCounts[val][idx]++;
+        });
+    });
+
+    renderChart('chartDeliveryDist', 'bar', {
+      labels: dLabels,
+      datasets: [
+        { label: 'Nota 1', data: dCounts[1], backgroundColor: '#cc1f1a' }, // Rojo
+        { label: 'Nota 2', data: dCounts[2], backgroundColor: '#e67e22' }, // Naranja Oscuro
+        { label: 'Nota 3', data: dCounts[3], backgroundColor: '#f1c40f' }, // Amarillo
+        { label: 'Nota 4', data: dCounts[4], backgroundColor: '#2ecc71' }, // Verde Claro
+        { label: 'Nota 5', data: dCounts[5], backgroundColor: '#0b8a5e' }  // Verde Provefarma
+      ]
+    }, {
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } } }
+    });
+
+    // Chart Vendedores (Comparativo)
     var phoneData = data.filter(function(r) { return r.canal === 'telefono'; });
     var fieldData = data.filter(function(r) { return r.canal === 'terreno'; });
-
-    var avgPhoneAmab = avg(phoneData, 'amabilidad') || 0;
-    var avgPhoneAses = avg(phoneData, 'asesoria') || 0;
-    var avgFieldAmab = avg(fieldData, 'amabilidad') || 0;
-    var avgFieldAses = avg(fieldData, 'asesoria') || 0;
-
     renderChart('chartVendedores', 'bar', {
       labels: ['Amabilidad', 'Asesoría'],
       datasets: [
-        {
-          label: 'Call Center',
-          data: [avgPhoneAmab, avgPhoneAses],
-          backgroundColor: '#f4bb00', // Amarillo
-          borderRadius: 4
-        },
-        {
-          label: 'Terreno',
-          data: [avgFieldAmab, avgFieldAses],
-          backgroundColor: '#8b5cf6', // Morado
-          borderRadius: 4
-        }
+        { label: 'Call Center', data: [avg(phoneData,'amabilidad')||0, avg(phoneData,'asesoria')||0], backgroundColor: '#f4bb00', borderRadius: 4 },
+        { label: 'Terreno', data: [avg(fieldData,'amabilidad')||0, avg(fieldData,'asesoria')||0], backgroundColor: '#8b5cf6', borderRadius: 4 }
       ]
-    }, {
-      scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 } } },
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } } }
-    });
-    // ---------------------------------------------
+    }, { scales: { y: { min: 0, max: 5 } }, plugins: { legend: { position: 'bottom' } } });
 
+    // Chart Motivos
     var motivoFiltered = data.filter(function(r) { return r.motivo_precio && r.motivo_precio.length > 0; });
     var motivoCounts = countBy(motivoFiltered, 'motivo_precio');
     var mLabels = Object.keys(motivoCounts);
@@ -800,7 +827,7 @@
       datasets: [{ data: mLabels.map(function(k) { return motivoCounts[k]; }), backgroundColor: '#cc1f1a', borderRadius: 4 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } } });
 
-    renderTable(data);
+    renderTables(data);
   }
 
   function renderChart(canvasId, type, chartData, options) {
@@ -812,7 +839,66 @@
     charts[canvasId] = new Chart(ctx, { type: type, data: chartData, options: baseOpts });
   }
 
-  function renderTable(data) {
+  function renderTables(data) {
+    // --- 1. TABLA CRÍTICA (ALERTAS) ---
+    var critBody = document.getElementById('criticalTableBody');
+    var alerts = [];
+    
+    // Lógica para detectar insatisfacción severa (Notas 1 o 2)
+    // Recorremos de más reciente a más antiguo
+    [...data].reverse().forEach(function(r) {
+        var reasons = [];
+        // Logística
+        if(r.tiempo_entrega <= 2) reasons.push("Logística: Tiempo (" + r.tiempo_entrega + ")");
+        if(r.exactitud <= 2) reasons.push("Logística: Exactitud (" + r.exactitud + ")");
+        if(r.estado <= 2) reasons.push("Logística: Estado (" + r.estado + ")");
+        
+        // Atención
+        if(r.amabilidad <= 2) reasons.push("Atención: Amabilidad (" + r.amabilidad + ")");
+        if(r.asesoria <= 2) reasons.push("Atención: Asesoría (" + r.asesoria + ")");
+        
+        // Web
+        if(r.nav_web <= 2) reasons.push("Web: Navegación (" + r.nav_web + ")");
+        if(r.soporte_web <= 2) reasons.push("Web: Soporte (" + r.soporte_web + ")");
+        
+        // Precios
+        if(r.precio_meds <= 2) reasons.push("Precio: Meds (" + r.precio_meds + ")");
+        if(r.precio_belleza <= 2) reasons.push("Precio: Belleza (" + r.precio_belleza + ")");
+
+        if (reasons.length > 0) {
+            // Buscar nombre cliente
+            var rutClean = cleanRut(r.rut);
+            var rutBody = rutClean.length > 1 ? rutClean.slice(0, -1) : rutClean;
+            var client = clientsMap[rutBody];
+            var clientName = client ? client.nombre : 'Desconocido';
+            
+            alerts.push({
+                fecha: formatFecha(r.fecha),
+                cliente: clientName + " <br><small style='color:#999'>" + r.rut_fmt + "</small>",
+                canal: r.canal,
+                motivos: reasons
+            });
+        }
+    });
+
+    if (alerts.length > 0) {
+        var html = '';
+        alerts.forEach(function(a) {
+            var badges = a.motivos.map(function(m) { return '<span class="badge-crit">' + m + '</span>'; }).join(' ');
+            html += '<tr>' +
+                '<td>' + a.fecha + '</td>' +
+                '<td>' + a.cliente + '</td>' +
+                '<td>' + escapeHtml(a.canal) + '</td>' +
+                '<td>' + badges + '</td>' +
+                '</tr>';
+        });
+        critBody.innerHTML = html;
+    } else {
+        critBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#6b7a94;">¡Excelente! No hay alertas críticas registradas.</td></tr>';
+    }
+
+
+    // --- 2. TABLA COMPLETA (Detalle) ---
     var tbody = document.getElementById('tableBody');
     document.getElementById('tableCount').textContent = data.length + ' registros totales';
     var html = '';
@@ -822,27 +908,20 @@
       var npsClass = r.nps >= 9 ? 'badge-promoter' : r.nps >= 7 ? 'badge-passive' : 'badge-detractor';
       var originalIndex = data.length - i;
       
-      // LOGICA DE CRUCE (MATCH): RUT Encuesta vs RUT CSV
-      // 1. Limpiar RUT Encuesta: 77.772.593-K -> 77772593K
-      // 2. Quitar último dígito (DV): 77772593K -> 77772593
       var rutClean = cleanRut(r.rut);
       var rutBody = rutClean.length > 1 ? rutClean.slice(0, -1) : rutClean;
-      
       var client = clientsMap[rutBody];
       var clientHtml = '<span style="color:#9ca3af; font-style:italic;">Desconocido</span>';
       
       if (client) {
-        clientHtml = '<div class="client-info">' +
-                     '<span class="client-name">' + escapeHtml(client.nombre) + '</span>' +
-                     '<span class="client-amount">' + moneyFormatter.format(client.monto) + '</span>' +
-                     '</div>';
+        clientHtml = '<div class="client-info"><span class="client-name">' + escapeHtml(client.nombre) + '</span><span class="client-amount">' + moneyFormatter.format(client.monto) + '</span></div>';
       }
 
       html += '<tr>' +
         '<td style="color:var(--muted); font-size:0.75rem;">' + originalIndex + '</td>' +
         '<td>' + formatFecha(r.fecha) + '</td>' +
         '<td style="font-family:\'JetBrains Mono\'">' + escapeHtml(r.rut_fmt) + '</td>' +
-        '<td>' + clientHtml + '</td>' + // Columna nueva con Datos Cliente
+        '<td>' + clientHtml + '</td>' + 
         '<td><strong>' + r.nps + '</strong></td>' +
         '<td><span class="badge ' + npsClass + '">' + (r.nps >= 9 ? 'Promotor' : r.nps >= 7 ? 'Pasivo' : 'Detractor') + '</span></td>' +
         '<td>' + escapeHtml(r.canal) + '</td>' +
@@ -859,10 +938,11 @@
     tbody.innerHTML = html;
   }
 
-  initDashboard(); // FIX: Calling the correct function
+  initDashboard(); 
   </script>
 </body>
 </html>
+
 
 
 
