@@ -849,21 +849,21 @@
     [...data].reverse().forEach(function(r) {
         var reasons = [];
         // Logística
-        if(r.tiempo_entrega <= 2) reasons.push("Logística: Tiempo (" + r.tiempo_entrega + ")");
-        if(r.exactitud <= 2) reasons.push("Logística: Exactitud (" + r.exactitud + ")");
-        if(r.estado <= 2) reasons.push("Logística: Estado (" + r.estado + ")");
+        if(r.tiempo_entrega !== null && r.tiempo_entrega <= 2) reasons.push("Logística: Tiempo (" + r.tiempo_entrega + ")");
+        if(r.exactitud !== null && r.exactitud <= 2) reasons.push("Logística: Exactitud (" + r.exactitud + ")");
+        if(r.estado !== null && r.estado <= 2) reasons.push("Logística: Estado (" + r.estado + ")");
         
         // Atención
-        if(r.amabilidad <= 2) reasons.push("Atención: Amabilidad (" + r.amabilidad + ")");
-        if(r.asesoria <= 2) reasons.push("Atención: Asesoría (" + r.asesoria + ")");
+        if(r.amabilidad !== null && r.amabilidad <= 2) reasons.push("Atención: Amabilidad (" + r.amabilidad + ")");
+        if(r.asesoria !== null && r.asesoria <= 2) reasons.push("Atención: Asesoría (" + r.asesoria + ")");
         
         // Web
-        if(r.nav_web <= 2) reasons.push("Web: Navegación (" + r.nav_web + ")");
-        if(r.soporte_web <= 2) reasons.push("Web: Soporte (" + r.soporte_web + ")");
+        if(r.nav_web !== null && r.nav_web <= 2) reasons.push("Web: Navegación (" + r.nav_web + ")");
+        if(r.soporte_web !== null && r.soporte_web <= 2) reasons.push("Web: Soporte (" + r.soporte_web + ")");
         
         // Precios
-        if(r.precio_meds <= 2) reasons.push("Precio: Meds (" + r.precio_meds + ")");
-        if(r.precio_belleza <= 2) reasons.push("Precio: Belleza (" + r.precio_belleza + ")");
+        if(r.precio_meds !== null && r.precio_meds <= 2) reasons.push("Precio: Meds (" + r.precio_meds + ")");
+        if(r.precio_belleza !== null && r.precio_belleza <= 2) reasons.push("Precio: Belleza (" + r.precio_belleza + ")");
 
         if (reasons.length > 0) {
             // Buscar nombre cliente
