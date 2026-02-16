@@ -315,7 +315,7 @@
     }
 
     .table-header {
-      padding: 20px 24px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -324,20 +324,21 @@
       gap: 12px;
     }
 
-    .table-header h3 { font-size: 0.95rem; font-weight: 700; }
+    .table-header h3 { font-size: 0.9rem; font-weight: 700; }
 
     .table-scroll { overflow-x: auto; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    /* Ajuste de fuentes para la tabla - más pequeña */
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
 
     thead th {
       background: var(--bg);
-      padding: 10px 14px;
+      padding: 8px 10px;
       text-align: left;
       font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       letter-spacing: 0.5px;
       white-space: nowrap;
       border-bottom: 1px solid var(--border);
@@ -346,25 +347,30 @@
     }
 
     tbody td {
-      padding: 10px 14px;
+      padding: 6px 10px;
       border-bottom: 1px solid #f0f2f5;
       white-space: normal;
       vertical-align: top;
+      font-size: 0.72rem;
     }
 
     tbody tr:hover { background: #f8fafc; }
 
     .badge {
       display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
     }
 
     .badge-promoter { background: #d1fae5; color: #065f46; }
     .badge-passive { background: #fef3c7; color: #92400e; }
     .badge-detractor { background: #fee2e2; color: #991b1b; }
+
+    .client-info { display: flex; flex-direction: column; }
+    .client-name { font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+    .client-amount { color: var(--success); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
 
     @media (max-width: 768px) {
       .dashboard { padding: 16px 12px 40px; }
@@ -390,7 +396,7 @@
         <div class="topbar-badge" id="badgeConexion">
           <span class="status-dot offline"></span> Sin datos
         </div>
-        <button class="btn-action btn-refresh" onclick="fetchFromSheets()">↻ Recargar Datos</button>
+        <button class="btn-action btn-refresh" onclick="initDashboard()">↻ Recargar Datos</button>
       </div>
     </div>
   </nav>
@@ -477,20 +483,19 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 40px;">#</th>
+              <th style="width: 30px;">#</th>
               <th>Fecha</th>
               <th>RUT</th>
+              <th>Cliente / Promedio (3m)</th> <!-- Columna Combinada Nueva -->
               <th>NPS</th>
-              <th>Tipo</th>
               <th>Canal</th>
-              <!-- Columnas Nuevas de Evaluación de Vendedor -->
-              <th>Amabilidad</th>
-              <th>Asesoría</th>
-              <th style="min-width: 250px;">Razón NPS</th>
+              <th>Amab</th> 
+              <th>Ases</th> 
+              <th style="min-width: 200px;">Razón NPS</th>
               <th>ISN</th>
-              <th>Precio Meds</th>
-              <th>Precio Belleza</th>
-              <th>T. Entrega</th>
+              <th>P.Meds</th>
+              <th>P.Bell</th>
+              <th>Entrega</th>
               <th>Exactitud</th>
               <th>Estado</th>
             </tr>
@@ -505,10 +510,20 @@
   </div>
 
   <script>
+  // CONFIGURACIÓN
   var SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzjy_OFmHa9zk4lE9SRexhzBWD5TVu_C3gDChm_ilKPtSUxncb0dDJ2cE99EHxjsKnTVQ/exec';
+  var CSV_URL = 'clientes paragithub.csv'; // Nombre exacto del archivo subido
 
   var rawData = [];
+  var clientsMap = {}; // Mapa RUT -> Datos
   var charts = {};
+
+  // Formateo de Dinero (Peso Chileno)
+  const moneyFormatter = new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0
+  });
 
   function parseNum(v) {
     if (v === '' || v === undefined || v === null) return null;
@@ -523,11 +538,15 @@
     return div.innerHTML;
   }
 
+  function cleanRut(rut) {
+    return (rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
+  }
+
   function formatFecha(f) {
     if (!f) return '—';
     var d = new Date(f);
     if (isNaN(d.getTime())) return String(f);
-    return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+    return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' });
   }
 
   function parseRows(rows) {
@@ -546,24 +565,71 @@
     }).filter(function(r) { return r.nps !== null; });
   }
 
-  function fetchFromSheets() {
-    updateStatus('Conectando con Google Sheets...', 'loading');
-    fetch(SHEETS_API_URL)
-      .then(function(res) { 
-        if (!res.ok) throw new Error('HTTP ' + res.status); 
-        return res.json(); 
-      })
-      .then(function(json) {
+  // --- Lógica para cargar CSV de Clientes ---
+  function parseClientsCSV(text) {
+    var lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length < 2) return; // Sin datos
+    
+    // Detectar separador (Tab o Punto y Coma o Coma)
+    var firstLine = lines[0];
+    var sep = ',';
+    if (firstLine.indexOf('\t') !== -1) sep = '\t';
+    else if (firstLine.indexOf(';') !== -1) sep = ';';
+
+    // Parsear líneas (Saltando encabezado)
+    for (var i = 1; i < lines.length; i++) {
+      var parts = lines[i].split(sep);
+      // Estructura esperada: RUT (col 0), Razón Social (col 1), Promedio (col 2)
+      if (parts.length >= 2) {
+        var rutRaw = parts[0].replace(/['"]/g, '').trim(); 
+        var clean = cleanRut(rutRaw); // Guardamos el RUT limpio (solo números, sin DV porque así viene en tu CSV)
+        
+        var nombre = parts[1].replace(/['"]/g, '').trim();
+        var monto = parts.length > 2 ? parts[2].replace(/['"]/g, '').trim() : '0';
+        
+        clientsMap[clean] = {
+          nombre: nombre,
+          monto: parseInt(monto) || 0
+        };
+      }
+    }
+    console.log("Clientes cargados:", Object.keys(clientsMap).length);
+  }
+
+  async function initDashboard() {
+    updateStatus('Conectando...', 'loading');
+    
+    try {
+      // Cargar CSV y Google Sheets en paralelo
+      const [csvRes, sheetsRes] = await Promise.allSettled([
+        fetch(CSV_URL),
+        fetch(SHEETS_API_URL)
+      ]);
+
+      // Procesar CSV de Clientes
+      if (csvRes.status === 'fulfilled' && csvRes.value.ok) {
+        const text = await csvRes.value.text();
+        parseClientsCSV(text);
+      } else {
+        console.warn("No se pudo cargar el archivo de clientes: " + CSV_URL);
+      }
+
+      // Procesar Google Sheets
+      if (sheetsRes.status === 'fulfilled' && sheetsRes.value.ok) {
+        const json = await sheetsRes.value.json();
         var rows = (json.data && Array.isArray(json.data)) ? json.data : Array.isArray(json) ? json : null;
-        if (!rows) throw new Error('Formato no reconocido');
+        if (!rows) throw new Error('Formato de datos incorrecto');
         rawData = parseRows(rows);
         renderDashboard();
-        updateStatus('Conectado a Google Sheets', 'live', rawData.length);
-      })
-      .catch(function(err) {
-        console.error('Error:', err);
-        updateStatus('Error al conectar: ' + err.message, 'error');
-      });
+        updateStatus('En vivo', 'live', rawData.length);
+      } else {
+        throw new Error('Error conectando a Google Sheets');
+      }
+
+    } catch (err) {
+      console.error(err);
+      updateStatus('Error: ' + err.message, 'error');
+    }
   }
 
   function updateStatus(msg, type, count) {
@@ -715,14 +781,30 @@
       var npsClass = r.nps >= 9 ? 'badge-promoter' : r.nps >= 7 ? 'badge-passive' : 'badge-detractor';
       var originalIndex = data.length - i;
       
+      // LOGICA DE CRUCE (MATCH): RUT Encuesta vs RUT CSV
+      // 1. Limpiar RUT Encuesta: 77.772.593-K -> 77772593K
+      // 2. Quitar último dígito (DV): 77772593K -> 77772593
+      var rutClean = cleanRut(r.rut);
+      var rutBody = rutClean.length > 1 ? rutClean.slice(0, -1) : rutClean;
+      
+      var client = clientsMap[rutBody];
+      var clientHtml = '<span style="color:#9ca3af; font-style:italic;">Desconocido</span>';
+      
+      if (client) {
+        clientHtml = '<div class="client-info">' +
+                     '<span class="client-name">' + escapeHtml(client.nombre) + '</span>' +
+                     '<span class="client-amount">' + moneyFormatter.format(client.monto) + '</span>' +
+                     '</div>';
+      }
+
       html += '<tr>' +
         '<td style="color:var(--muted); font-size:0.75rem;">' + originalIndex + '</td>' +
         '<td>' + formatFecha(r.fecha) + '</td>' +
         '<td style="font-family:\'JetBrains Mono\'">' + escapeHtml(r.rut_fmt) + '</td>' +
+        '<td>' + clientHtml + '</td>' + // Columna nueva con Datos Cliente
         '<td><strong>' + r.nps + '</strong></td>' +
         '<td><span class="badge ' + npsClass + '">' + (r.nps >= 9 ? 'Promotor' : r.nps >= 7 ? 'Pasivo' : 'Detractor') + '</span></td>' +
         '<td>' + escapeHtml(r.canal) + '</td>' +
-        // Nuevos datos de Amabilidad y Asesoría
         '<td>' + (r.amabilidad !== null ? r.amabilidad : '—') + '</td>' +
         '<td>' + (r.asesoria !== null ? r.asesoria : '—') + '</td>' +
         '<td title="' + escapeHtml(r.nps_razon) + '">' + escapeHtml(r.nps_razon) + '</td>' +
@@ -736,7 +818,8 @@
     tbody.innerHTML = html;
   }
 
-  fetchFromSheets();
+  initDashboard(); // FIX: Calling the correct function
   </script>
 </body>
 </html>
+
