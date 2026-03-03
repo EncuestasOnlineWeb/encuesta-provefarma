@@ -837,7 +837,6 @@
     var motivoCounts = countBy(motivoFiltered, 'motivo_precio');
     var mLabels = Object.keys(motivoCounts);
     renderChart('chartMotivos', 'bar', {
-      // CAMBIO GRÁFICO PRECIOS: Se amplió el slice de 15 a 35 para que no corte los textos.
       labels: mLabels.map(function(l) { return l.length > 35 ? l.slice(0, 35) + '...' : l; }),
       datasets: [{ data: mLabels.map(function(k) { return motivoCounts[k]; }), backgroundColor: '#cc1f1a', borderRadius: 4 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } } });
@@ -879,7 +878,7 @@
             var clientRegion = client ? client.region : 'Sin región';
             var clientVendedor = client ? client.vendedor : 'Sin vendedor';
             
-            // Guardar para Excel
+            // Guardar para Excel (Añadido el comentario NPS y limpiando saltos de línea/comillas para no romper el CSV)
             currentAlertsData.push({
                fechaFmt: formatFecha(r.fecha),
                rut: r.rut_fmt,
@@ -887,7 +886,8 @@
                region: clientRegion,
                vendedor: clientVendedor,
                canal: r.canal,
-               motivos: reasons.join(' | ')
+               motivos: reasons.join(' | '),
+               nps_razon: r.nps_razon ? r.nps_razon.replace(/"/g, '""').replace(/\n/g, ' ') : '' // Limpia para CSV
             });
 
             // Guardar para HTML
@@ -967,8 +967,8 @@
         return; // No hace nada si no hay alertas
     }
     
-    // Encabezados
-    var csvContent = "Fecha;RUT;Cliente;Region;Vendedor;Canal;Alertas Detectadas\n";
+    // Encabezados (Añadido el comentario)
+    var csvContent = "Fecha;RUT;Cliente;Region;Vendedor;Canal;Alertas Detectadas;Comentario NPS\n";
     
     currentAlertsData.forEach(function(a) {
         var row = [
@@ -978,7 +978,8 @@
             '"' + a.region + '"',
             '"' + a.vendedor + '"',
             a.canal,
-            '"' + a.motivos + '"'
+            '"' + a.motivos + '"',
+            '"' + a.nps_razon + '"' // Agregado aquí
         ];
         csvContent += row.join(";") + "\n";
     });
