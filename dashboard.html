@@ -114,6 +114,9 @@
 
     .btn-action:hover { transform: translateY(-1px); }
 
+    .btn-csv { background: var(--success); color: #fff; }
+    .btn-csv:hover { background: #09734e; }
+
     .btn-refresh { background: rgba(255,255,255,0.15); color: #fff; }
     .btn-refresh:hover { background: rgba(255,255,255,0.25); }
 
@@ -308,11 +311,11 @@
 
     /* --- ESTILO PARA TABLA CRÍTICA --- */
     .critical-card {
-        background: #fffafa; /* Fondo rojizo muy suave */
+        background: #fffafa; 
         border-left: 5px solid var(--danger);
     }
     
-    .critical-card h3 { color: var(--danger); }
+    .critical-card h3 { color: var(--danger); margin: 0;}
 
     .table-card {
       background: var(--card);
@@ -332,11 +335,15 @@
       gap: 12px;
     }
 
-    .table-header h3 { font-size: 0.9rem; font-weight: 700; }
+    .table-header-left {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .table-header h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px;}
 
     .table-scroll { overflow-x: auto; }
 
-    /* Ajuste de fuentes para la tabla - más pequeña */
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
 
     thead th {
@@ -380,6 +387,7 @@
 
     .client-info { display: flex; flex-direction: column; }
     .client-name { font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+    .client-meta { color: var(--muted); font-size: 0.7rem; margin-bottom: 2px; }
     .client-amount { color: var(--success); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
 
     @media (max-width: 768px) {
@@ -475,7 +483,6 @@
         </div>
       </div>
 
-      <!-- NUEVO: GRÁFICO DISTRIBUCIÓN DESPACHO -->
       <div class="chart-card full">
         <h3>Evaluación Detallada de Logística</h3>
         <p class="chart-sub">Distribución de notas (1 a 5) en los 3 pilares del despacho</p>
@@ -501,18 +508,21 @@
       </div>
     </div>
 
-    <!-- NUEVO: TABLA DE ALERTAS CRÍTICAS -->
+    <!-- TABLA DE ALERTAS CRÍTICAS CON BOTÓN -->
     <div class="table-card critical-card" style="margin-bottom: 24px;">
         <div class="table-header">
-          <h3>🚨 Alertas de Insatisfacción (Notas 1 y 2)</h3>
-          <span style="font-size:0.8rem; color:var(--muted);">Foco en problemas críticos</span>
+          <div class="table-header-left">
+            <h3>🚨 Alertas de Insatisfacción (Notas 1 y 2)</h3>
+            <span style="font-size:0.8rem; color:var(--muted);">Foco en problemas críticos</span>
+          </div>
+          <button class="btn-action btn-csv" onclick="downloadAlertsCSV()" style="padding: 6px 12px; font-size: 0.75rem;">⬇ Descargar Excel</button>
         </div>
         <div class="table-scroll">
           <table>
             <thead>
               <tr>
                 <th>Fecha</th>
-                <th>Cliente</th>
+                <th>Cliente / Región / Vendedor</th>
                 <th>Canal</th>
                 <th>Alertas Detectadas</th>
               </tr>
@@ -526,8 +536,10 @@
 
     <div class="table-card">
       <div class="table-header">
-        <h3>Detalle de Respuestas Recientes</h3>
-        <span id="tableCount" style="font-size:0.82rem; color:var(--muted);"></span>
+        <div class="table-header-left">
+          <h3>Detalle de Respuestas Recientes</h3>
+          <span id="tableCount" style="font-size:0.82rem; color:var(--muted);"></span>
+        </div>
       </div>
       <div class="table-scroll">
         <table>
@@ -536,7 +548,7 @@
               <th style="width: 30px;">#</th>
               <th>Fecha</th>
               <th>RUT</th>
-              <th>Cliente / Promedio (3m)</th>
+              <th>Cliente / Datos</th>
               <th>NPS</th>
               <th>Tipo</th>
               <th>Canal</th>
@@ -563,11 +575,12 @@
   <script>
   // CONFIGURACIÓN
   var SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzjy_OFmHa9zk4lE9SRexhzBWD5TVu_C3gDChm_ilKPtSUxncb0dDJ2cE99EHxjsKnTVQ/exec';
-  var CSV_URL = 'localesencuesta.csv'; // CAMBIO: Nuevo nombre exacto del archivo
+  var CSV_URL = 'localesencuesta.csv'; // Nuevo archivo
 
   var rawData = [];
   var clientsMap = {}; 
   var charts = {};
+  var currentAlertsData = []; // Variable global para guardar datos del botón excel
 
   const moneyFormatter = new Intl.NumberFormat('es-CL', {
     style: 'currency',
@@ -626,14 +639,14 @@
 
     for (var i = 1; i < lines.length; i++) {
       var parts = lines[i].split(sep);
-      // CAMBIO: Nueva estructura -> RUT(0), Razón(1), Vendedor(2), Región(3), Promedio(4)
+      // NUEVA ESTRUCTURA: RUT(0), Razón(1), Vendedor(2), Región(3), Promedio(4)
       if (parts.length >= 2) {
         var rutRaw = parts[0].replace(/['"]/g, '').trim(); 
         var clean = cleanRut(rutRaw); 
-        var nombre = parts[1].replace(/['"]/g, '').trim();
-        var vendedor = parts.length > 2 ? parts[2].replace(/['"]/g, '').trim() : 'Sin vendedor';
-        var region = parts.length > 3 ? parts[3].replace(/['"]/g, '').trim() : 'Sin región';
-        var monto = parts.length > 4 ? parts[4].replace(/['"]/g, '').trim() : '0';
+        var nombre = parts[1] ? parts[1].replace(/['"]/g, '').trim() : 'Desconocido';
+        var vendedor = parts.length > 2 && parts[2] ? parts[2].replace(/['"]/g, '').trim() : 'Sin vendedor';
+        var region = parts.length > 3 && parts[3] ? parts[3].replace(/['"]/g, '').trim() : 'Sin región';
+        var monto = parts.length > 4 && parts[4] ? parts[4].replace(/['"]/g, '').trim() : '0';
         
         clientsMap[clean] = { 
             nombre: nombre, 
@@ -657,7 +670,7 @@
         const text = await csvRes.value.text();
         parseClientsCSV(text);
       } else {
-        console.warn("No se pudo cargar clientes csv.");
+        console.warn("No se pudo cargar el archivo " + CSV_URL);
       }
 
       if (sheetsRes.status === 'fulfilled' && sheetsRes.value.ok) {
@@ -714,7 +727,6 @@
     if (rawData.length === 0) return;
     var data = rawData; 
     
-    // --- 1. RENDERING KPIS (Igual que antes) ---
     var nps = calcNPS(data);
     var kpiNPS = document.getElementById('kpiNPS');
     kpiNPS.textContent = nps.score;
@@ -743,7 +755,6 @@
     if (nps.pPas > 0) { var p = document.createElement('div'); p.className = 'nps-seg-passive'; p.style.width = nps.pPas + '%'; p.textContent = nps.pPas + '%'; bar.appendChild(p); }
     if (nps.pPro > 0) { var pr = document.createElement('div'); pr.className = 'nps-seg-promoter'; pr.style.width = nps.pPro + '%'; pr.textContent = nps.pPro + '%'; bar.appendChild(pr); }
 
-    // --- 2. RENDERING CHARTS ---
     var npsDist = [0,0,0,0,0,0,0,0,0,0,0];
     data.forEach(function(r) { if (r.nps !== null && r.nps >= 0 && r.nps <= 10) npsDist[r.nps]++; });
     renderChart('chartNPSdist', 'bar', {
@@ -760,7 +771,6 @@
       datasets: [{ data: canalData, backgroundColor: canalColors, borderWidth: 2 }]
     }, { cutout: '65%', plugins: { legend: { display: false } } });
 
-    // Leyenda Manual Canal
     var legendHtml = '';
     canalOrder.forEach(function(c, i) {
       var count = canalCounts[c] || 0;
@@ -769,7 +779,6 @@
     });
     document.getElementById('canalLegend').innerHTML = legendHtml;
 
-    // Chart Dimensions (Overview)
     var dimensions = [
       { key: 'amabilidad', label: 'Amabilidad' }, { key: 'asesoria', label: 'Asesoría' },
       { key: 'nav_web', label: 'Web UX' }, { key: 'stock', label: 'Stock' },
@@ -789,8 +798,6 @@
       datasets: [{ data: dimValues, backgroundColor: dimColors, borderRadius: 6 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 5 } } });
 
-    // NUEVO: Chart Delivery Distribution (Stacked)
-    // Calculamos frecuencias 1-5 para cada dimensión de despacho
     var dDims = ['tiempo_entrega', 'exactitud', 'estado'];
     var dLabels = ['Tiempo Entrega', 'Exactitud Pedido', 'Estado Productos'];
     var dCounts = { 1: [0,0,0], 2: [0,0,0], 3: [0,0,0], 4: [0,0,0], 5: [0,0,0] };
@@ -805,18 +812,17 @@
     renderChart('chartDeliveryDist', 'bar', {
       labels: dLabels,
       datasets: [
-        { label: 'Nota 1', data: dCounts[1], backgroundColor: '#cc1f1a' }, // Rojo
-        { label: 'Nota 2', data: dCounts[2], backgroundColor: '#e67e22' }, // Naranja Oscuro
-        { label: 'Nota 3', data: dCounts[3], backgroundColor: '#f1c40f' }, // Amarillo
-        { label: 'Nota 4', data: dCounts[4], backgroundColor: '#2ecc71' }, // Verde Claro
-        { label: 'Nota 5', data: dCounts[5], backgroundColor: '#0b8a5e' }  // Verde Provefarma
+        { label: 'Nota 1', data: dCounts[1], backgroundColor: '#cc1f1a' }, 
+        { label: 'Nota 2', data: dCounts[2], backgroundColor: '#e67e22' }, 
+        { label: 'Nota 3', data: dCounts[3], backgroundColor: '#f1c40f' }, 
+        { label: 'Nota 4', data: dCounts[4], backgroundColor: '#2ecc71' }, 
+        { label: 'Nota 5', data: dCounts[5], backgroundColor: '#0b8a5e' }  
       ]
     }, {
       scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } },
       plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } } }
     });
 
-    // Chart Vendedores (Comparativo)
     var phoneData = data.filter(function(r) { return r.canal === 'telefono'; });
     var fieldData = data.filter(function(r) { return r.canal === 'terreno'; });
     renderChart('chartVendedores', 'bar', {
@@ -827,12 +833,12 @@
       ]
     }, { scales: { y: { min: 0, max: 5 } }, plugins: { legend: { position: 'bottom' } } });
 
-    // Chart Motivos
     var motivoFiltered = data.filter(function(r) { return r.motivo_precio && r.motivo_precio.length > 0; });
     var motivoCounts = countBy(motivoFiltered, 'motivo_precio');
     var mLabels = Object.keys(motivoCounts);
     renderChart('chartMotivos', 'bar', {
-      labels: mLabels.map(function(l) { return l.length > 15 ? l.slice(0, 15) + '...' : l; }),
+      // CAMBIO GRÁFICO PRECIOS: Se amplió el slice de 15 a 35 para que no corte los textos.
+      labels: mLabels.map(function(l) { return l.length > 35 ? l.slice(0, 35) + '...' : l; }),
       datasets: [{ data: mLabels.map(function(k) { return motivoCounts[k]; }), backgroundColor: '#cc1f1a', borderRadius: 4 }]
     }, { indexAxis: 'y', plugins: { legend: { display: false } } });
 
@@ -849,41 +855,45 @@
   }
 
   function renderTables(data) {
-    // --- 1. TABLA CRÍTICA (ALERTAS) ---
     var critBody = document.getElementById('criticalTableBody');
     var alerts = [];
+    currentAlertsData = []; // Limpiar data para exportación
     
-    // Lógica para detectar insatisfacción severa (Notas 1 o 2)
-    // Recorremos de más reciente a más antiguo
     [...data].reverse().forEach(function(r) {
         var reasons = [];
-        // Logística
         if(r.tiempo_entrega !== null && r.tiempo_entrega <= 2) reasons.push("Logística: Tiempo (" + r.tiempo_entrega + ")");
         if(r.exactitud !== null && r.exactitud <= 2) reasons.push("Logística: Exactitud (" + r.exactitud + ")");
         if(r.estado !== null && r.estado <= 2) reasons.push("Logística: Estado (" + r.estado + ")");
-        
-        // Atención
         if(r.amabilidad !== null && r.amabilidad <= 2) reasons.push("Atención: Amabilidad (" + r.amabilidad + ")");
         if(r.asesoria !== null && r.asesoria <= 2) reasons.push("Atención: Asesoría (" + r.asesoria + ")");
-        
-        // Web
         if(r.nav_web !== null && r.nav_web <= 2) reasons.push("Web: Navegación (" + r.nav_web + ")");
         if(r.soporte_web !== null && r.soporte_web <= 2) reasons.push("Web: Soporte (" + r.soporte_web + ")");
-        
-        // Precios
         if(r.precio_meds !== null && r.precio_meds <= 2) reasons.push("Precio: Meds (" + r.precio_meds + ")");
         if(r.precio_belleza !== null && r.precio_belleza <= 2) reasons.push("Precio: Belleza (" + r.precio_belleza + ")");
 
         if (reasons.length > 0) {
-            // Buscar nombre cliente
             var rutClean = cleanRut(r.rut);
             var rutBody = rutClean.length > 1 ? rutClean.slice(0, -1) : rutClean;
             var client = clientsMap[rutBody];
             var clientName = client ? client.nombre : 'Desconocido';
+            var clientRegion = client ? client.region : 'Sin región';
+            var clientVendedor = client ? client.vendedor : 'Sin vendedor';
             
+            // Guardar para Excel
+            currentAlertsData.push({
+               fechaFmt: formatFecha(r.fecha),
+               rut: r.rut_fmt,
+               cliente: clientName,
+               region: clientRegion,
+               vendedor: clientVendedor,
+               canal: r.canal,
+               motivos: reasons.join(' | ')
+            });
+
+            // Guardar para HTML
             alerts.push({
                 fecha: formatFecha(r.fecha),
-                cliente: clientName + " <br><small style='color:#999'>" + r.rut_fmt + "</small>",
+                cliente: clientName + " <br><small style='color:#999'>" + r.rut_fmt + "</small><br><span style='color:#1f57a8; font-weight:600; font-size:0.7rem;'>" + escapeHtml(clientRegion) + " | " + escapeHtml(clientVendedor) + "</span>",
                 canal: r.canal,
                 motivos: reasons
             });
@@ -910,7 +920,7 @@
     // --- 2. TABLA COMPLETA (Detalle) ---
     var tbody = document.getElementById('tableBody');
     document.getElementById('tableCount').textContent = data.length + ' registros totales';
-    var html = '';
+    var htmlFull = '';
     var reversedData = [...data].reverse(); 
     
     reversedData.slice(0, 100).forEach(function(r, i) {
@@ -923,10 +933,14 @@
       var clientHtml = '<span style="color:#9ca3af; font-style:italic;">Desconocido</span>';
       
       if (client) {
-        clientHtml = '<div class="client-info"><span class="client-name">' + escapeHtml(client.nombre) + '</span><span class="client-amount">' + moneyFormatter.format(client.monto) + '</span></div>';
+        clientHtml = '<div class="client-info">' +
+                     '<span class="client-name">' + escapeHtml(client.nombre) + '</span>' +
+                     '<span class="client-meta">' + escapeHtml(client.region) + ' | Vend: ' + escapeHtml(client.vendedor) + '</span>' +
+                     '<span class="client-amount">' + moneyFormatter.format(client.monto) + '</span>' +
+                     '</div>';
       }
 
-      html += '<tr>' +
+      htmlFull += '<tr>' +
         '<td style="color:var(--muted); font-size:0.75rem;">' + originalIndex + '</td>' +
         '<td>' + formatFecha(r.fecha) + '</td>' +
         '<td style="font-family:\'JetBrains Mono\'">' + escapeHtml(r.rut_fmt) + '</td>' +
@@ -944,15 +958,43 @@
         '<td>' + (r.exactitud||'—') + '</td>' +
         '<td>' + (r.estado||'—') + '</td></tr>';
     });
-    tbody.innerHTML = html;
+    tbody.innerHTML = htmlFull;
+  }
+
+  // --- FUNCIÓN PARA DESCARGAR EXCEL DE ALERTAS ---
+  function downloadAlertsCSV() {
+    if (!currentAlertsData || currentAlertsData.length === 0) {
+        return; // No hace nada si no hay alertas
+    }
+    
+    // Encabezados
+    var csvContent = "Fecha;RUT;Cliente;Region;Vendedor;Canal;Alertas Detectadas\n";
+    
+    currentAlertsData.forEach(function(a) {
+        var row = [
+            a.fechaFmt,
+            a.rut,
+            '"' + a.cliente + '"',
+            '"' + a.region + '"',
+            '"' + a.vendedor + '"',
+            a.canal,
+            '"' + a.motivos + '"'
+        ];
+        csvContent += row.join(";") + "\n";
+    });
+
+    // Se agrega el BOM (\uFEFF) para que Excel lea las tildes correctamente
+    var blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "alertas_criticas_provefarma.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   initDashboard(); 
   </script>
 </body>
 </html>
-
-
-
-
-
