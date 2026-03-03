@@ -563,7 +563,7 @@
   <script>
   // CONFIGURACIÓN
   var SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzjy_OFmHa9zk4lE9SRexhzBWD5TVu_C3gDChm_ilKPtSUxncb0dDJ2cE99EHxjsKnTVQ/exec';
-  var CSV_URL = 'clientes paragithub.csv'; 
+  var CSV_URL = 'localesencuesta.csv'; // CAMBIO: Nuevo nombre exacto del archivo
 
   var rawData = [];
   var clientsMap = {}; 
@@ -626,12 +626,21 @@
 
     for (var i = 1; i < lines.length; i++) {
       var parts = lines[i].split(sep);
+      // CAMBIO: Nueva estructura -> RUT(0), Razón(1), Vendedor(2), Región(3), Promedio(4)
       if (parts.length >= 2) {
         var rutRaw = parts[0].replace(/['"]/g, '').trim(); 
         var clean = cleanRut(rutRaw); 
         var nombre = parts[1].replace(/['"]/g, '').trim();
-        var monto = parts.length > 2 ? parts[2].replace(/['"]/g, '').trim() : '0';
-        clientsMap[clean] = { nombre: nombre, monto: parseInt(monto) || 0 };
+        var vendedor = parts.length > 2 ? parts[2].replace(/['"]/g, '').trim() : 'Sin vendedor';
+        var region = parts.length > 3 ? parts[3].replace(/['"]/g, '').trim() : 'Sin región';
+        var monto = parts.length > 4 ? parts[4].replace(/['"]/g, '').trim() : '0';
+        
+        clientsMap[clean] = { 
+            nombre: nombre, 
+            vendedor: vendedor,
+            region: region,
+            monto: parseInt(monto) || 0 
+        };
       }
     }
   }
@@ -942,7 +951,6 @@
   </script>
 </body>
 </html>
-
 
 
 
